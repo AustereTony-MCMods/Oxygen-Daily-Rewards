@@ -1,0 +1,19 @@
+oxygen_dailyrewards.gui.dailyrewards.title=Ежедневные Награды: %s
+oxygen_dailyrewards.gui.dailyrewards.rewardDay=День %s
+oxygen_dailyrewards.gui.dailyrewards.rewardAvailable=Доступно
+oxygen_dailyrewards.gui.dailyrewards.nextReward=Следующая Награда
+oxygen_dailyrewards.gui.dailyrewards.claim=Забрать
+oxygen_dailyrewards.gui.dailyrewards.prevButton=Назад
+oxygen_dailyrewards.gui.dailyrewards.nextButton=Вперёд
+oxygen_dailyrewards.gui.dailyrewards.amount=x%s
+oxygen_dailyrewards.gui.dailyrewards.nextMonthBegins=- начнётся новый месяц
+
+oxygen_dailyrewards.description.item=Предмет
+oxygen_dailyrewards.description.currency=Валюта
+
+oxygen_dailyrewards.status.dailyRewardAvailable=Доступна ежедневная награда
+oxygen_dailyrewards.status.dailyRewardClaimed=Ежедневная награда получена
+oxygen_dailyrewards.status.dailyRewardUnavailable=Ежедневная награда недоступна
+
+oxygen_dailyrewards.message.dailyRewardAvailable=Доступна ежедневная награда:
+oxygen_dailyrewards.message.clickHere=кликнуть здесь

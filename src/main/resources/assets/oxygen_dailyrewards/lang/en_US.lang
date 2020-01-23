@@ -1,0 +1,19 @@
+oxygen_dailyrewards.gui.dailyrewards.title=Daily Rewards: %s
+oxygen_dailyrewards.gui.dailyrewards.rewardDay=Day %s
+oxygen_dailyrewards.gui.dailyrewards.rewardAvailable=Available
+oxygen_dailyrewards.gui.dailyrewards.nextReward=Next Reward
+oxygen_dailyrewards.gui.dailyrewards.claimButton=Claim
+oxygen_dailyrewards.gui.dailyrewards.prevButton=Previous
+oxygen_dailyrewards.gui.dailyrewards.nextButton=Next
+oxygen_dailyrewards.gui.dailyrewards.amount=x%s
+oxygen_dailyrewards.gui.dailyrewards.nextMonthBegins=- next month begins
+
+oxygen_dailyrewards.description.item=Item
+oxygen_dailyrewards.description.currency=Currency
+
+oxygen_dailyrewards.status.dailyRewardAvailable=You have available daily reward
+oxygen_dailyrewards.status.dailyRewardClaimed=Daily reward claimed
+oxygen_dailyrewards.status.dailyRewardUnavailable=Daily reward unavailable
+
+oxygen_dailyrewards.message.dailyRewardAvailable=You have available daily reward: 
+oxygen_dailyrewards.message.clickHere=click here
