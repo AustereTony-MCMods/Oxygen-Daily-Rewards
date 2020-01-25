@@ -36,21 +36,19 @@ public class PlayersDataManagerServer {
                 playerData.getDaysRewarded(), 
                 playerData.getLastRewardTimeMillis()), playerMP);
 
-        ITextComponent 
-        message = new TextComponentTranslation("oxygen_dailyrewards.message.dailyRewardAvailable"),
-        component = new TextComponentTranslation("oxygen_dailyrewards.message.clickHere");
-        message.getStyle().setItalic(true);
-        message.getStyle().setColor(TextFormatting.AQUA);
-        component.getStyle().setItalic(true);
-        component.getStyle().setUnderlined(true);
-        component.getStyle().setColor(TextFormatting.WHITE);
-        component.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/oxygenc dailyrewards"));
+        if (playerData.isRewardAvailable(playerUUID)) {
+            ITextComponent 
+            message = new TextComponentTranslation("oxygen_dailyrewards.message.dailyRewardAvailable"),
+            component = new TextComponentTranslation("oxygen_dailyrewards.message.clickHere");
+            message.getStyle().setItalic(true);
+            message.getStyle().setColor(TextFormatting.AQUA);
+            component.getStyle().setItalic(true);
+            component.getStyle().setUnderlined(true);
+            component.getStyle().setColor(TextFormatting.WHITE);
+            component.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/oxygenc dailyrewards"));
 
-        if (playerData.isRewardAvailable(playerUUID))
-            playerMP.sendMessage(message/*.appendSibling(new TextComponentString(" "))*/.appendSibling(component));
-
-        /*if (playerData.isRewardAvailable())
-            OxygenHelperServer.sendStatusMessage(playerMP, DailyRewardsMain.DAILY_REWARDS_MOD_INDEX, EnumDailyRewardsStatusMessage.DAILY_REWARD_AVAILABLE.ordinal());*/
+            playerMP.sendMessage(message.appendSibling(component));
+        }
     }
 
     public void claimReward(EntityPlayerMP playerMP) {

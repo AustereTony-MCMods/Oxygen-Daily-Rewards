@@ -91,7 +91,7 @@ public class RewardsSection extends AbstractGUISection {
             rewarded = i <= this.daysRewarded;
             nextReward = i == this.daysRewarded + 1 && i <= this.monthLength - this.currentDayOfMonth + 1;
             locked = this.rewardClaimed || i > this.daysRewarded + 1;
-            unreachable = i > (this.monthLength - this.currentDayOfMonth + 1) || (maximumRewards != - 1 && i > maximumRewards);
+            unreachable = i > (this.monthLength - this.currentDayOfMonth + this.daysRewarded + (this.rewardClaimed ? 0 : 1)) || (maximumRewards != - 1 && i > maximumRewards);
             if (index < 3)
                 this.framework.addElement(new DailyRewardWidget(6 + index++ * (WIDGET_WIDTH + 1), 16, reward, rewarded, nextReward, locked, unreachable));
             else if (index < 6)

@@ -21,19 +21,6 @@ public class DailyRewardsArgumentClient implements ArgumentExecutor {
     public void process(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (args.length == 1)
             OxygenHelperClient.scheduleTask(()->this.openDailyRewardsMenu(), 100L, TimeUnit.MILLISECONDS);
-        /*else if (args[1].equals("-test")) {
-            ZonedDateTime 
-            currentTime = TimeHelperClient.getZonedDateTime(),
-            testTime = ZonedDateTime.of(2019, 1, 20, 23, 59, 59, 0, TimeHelperClient.getZoneId());
-
-            Period period = Period.between(testTime.toLocalDate(), currentTime.toLocalDate());
-
-            boolean rewardAvailable = (Period.between(testTime.toLocalDate(), currentTime.toLocalDate()).getDays() >= 1)
-            && currentTime.getHour() >= DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt();
-
-            DailyRewardsMain.LOGGER.info(" ///--- Period in days: {}", period.getDays());
-            DailyRewardsMain.LOGGER.info(" ///--- Reward available: {}", rewardAvailable);
-        }*/
     }
 
     private void openDailyRewardsMenu() {
