@@ -6,7 +6,10 @@ public enum EnumDailyRewardsStatusMessage {
 
     DAILY_REWARD_AVAILABLE("dailyRewardAvailable"),
     DAILY_REWARD_CLAIMED("dailyRewardClaimed"),
-    DAILY_REWARD_UNAVAILABLE("dailyRewardUnavailable");
+    DAILY_REWARD_UNAVAILABLE("dailyRewardUnavailable"),
+    
+    DAILY_REWARDS_RELOADED("dailyRewardReloaded"),
+    ITEMSTACK_SERIALIZED("itemStackSerialized");
 
     private final String status;
 

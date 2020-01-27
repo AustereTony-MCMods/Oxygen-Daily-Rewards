@@ -23,7 +23,7 @@ import austeretony.oxygen_dailyrewards.common.network.client.CPSyncRewardsData;
 import austeretony.oxygen_dailyrewards.server.DailyRewardsManagerServer;
 import austeretony.oxygen_dailyrewards.server.command.DailyRewardsArgumentOperator;
 import austeretony.oxygen_dailyrewards.server.command.DailyRewardsArgumentServer;
-import austeretony.oxygen_dailyrewards.server.event.RegionsEventsServer;
+import austeretony.oxygen_dailyrewards.server.event.DailyRewardsEventsServer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -42,7 +42,7 @@ public class DailyRewardsMain {
     public static final String 
     MODID = "oxygen_dailyrewards",
     NAME = "Oxygen: Daily Rewards",
-    VERSION = "0.10.0",
+    VERSION = "0.10.1",
     VERSION_CUSTOM = VERSION + ":beta:0",
     GAME_VERSION = "1.12.2",
     VERSIONS_FORGE_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/Oxygen-Daily-Rewards/info/mod_versions_forge.json";
@@ -70,7 +70,7 @@ public class DailyRewardsMain {
     public void init(FMLInitializationEvent event) {
         this.initNetwork();
         DailyRewardsManagerServer.create();
-        CommonReference.registerEvent(new RegionsEventsServer());
+        CommonReference.registerEvent(new DailyRewardsEventsServer());
         NetworkRequestsRegistryServer.registerRequest(CLAIM_REWARD_REQUEST_ID, 5000);
         CommandOxygenServer.registerArgument(new DailyRewardsArgumentServer());
         CommandOxygenOperator.registerArgument(new DailyRewardsArgumentOperator());

@@ -15,5 +15,8 @@ oxygen_dailyrewards.status.dailyRewardAvailable=Доступна ежеднев�
 oxygen_dailyrewards.status.dailyRewardClaimed=Ежедневная награда получена
 oxygen_dailyrewards.status.dailyRewardUnavailable=Ежедневная награда недоступна
 
+oxygen_dailyrewards.status.dailyRewardReloaded=Ежедневные награды перезагружены
+oxygen_dailyrewards.status.itemStackSerialized=Предмет сериализован
+
 oxygen_dailyrewards.message.dailyRewardAvailable=Доступна ежедневная награда:
 oxygen_dailyrewards.message.clickHere=кликнуть здесь

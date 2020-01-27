@@ -1,5 +1,7 @@
 package austeretony.oxygen_dailyrewards.server;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import austeretony.oxygen_core.common.api.CommonReference;
@@ -40,17 +42,28 @@ public class DailyRewardsManagerServer {
 
     private void scheduleRepeatableProcesses() {
         OxygenHelperServer.getSchedulerExecutorService().scheduleAtFixedRate(
-                ()->this.updateRewards(), 1L, 1L, TimeUnit.HOURS);
+                ()->this.validateRewards(), 1L, 1L, TimeUnit.HOURS);
     }
 
-    private void updateRewards() {
+    private void validateRewards() {
         int month = TimeHelperServer.getZonedDateTime().getMonthValue();
-        if (this.currentMonth != month) {
-            this.rewardsDataContainer.loadRewardsData();
-            OxygenHelperServer.getOnlinePlayersUUIDs().forEach(
-                    (playerUUID)->this.rewardsDataContainer.syncRewardsData(CommonReference.playerByUUID(playerUUID)));
-        }
+        if (this.currentMonth != month)
+            this.reloadRewards();
         this.currentMonth = month;
+    }
+
+    public void reloadRewards() {
+        Runnable reloadingTask = ()->{
+            Future future = OxygenHelperServer.getExecutionManager().addIOTask(()->this.rewardsDataContainer.loadRewardsData());
+            try {
+                future.get();
+                OxygenHelperServer.getOnlinePlayersUUIDs().forEach(
+                        (playerUUID)->this.rewardsDataContainer.syncRewardsData(CommonReference.playerByUUID(playerUUID)));
+            } catch (ExecutionException | InterruptedException exception) {
+                exception.printStackTrace();
+            }
+        };
+        OxygenHelperServer.addRoutineTask(reloadingTask);
     }
 
     public static void create() {
@@ -84,6 +97,10 @@ public class DailyRewardsManagerServer {
     //TODO Move to Core
     public TimeManagerServer getTimeManager() {
         return this.timeManager;
+    }
+
+    public void worldLoaded() {
+        OxygenHelperServer.addIOTask(()->this.rewardsDataContainer.loadRewardsData());
     }
 
     public void onPlayerLoaded(EntityPlayerMP playerMP) {

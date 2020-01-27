@@ -15,5 +15,8 @@ oxygen_dailyrewards.status.dailyRewardAvailable=You have available daily reward
 oxygen_dailyrewards.status.dailyRewardClaimed=Daily reward claimed
 oxygen_dailyrewards.status.dailyRewardUnavailable=Daily reward unavailable
 
+oxygen_dailyrewards.status.dailyRewardReloaded=Daily rewards reloaded
+oxygen_dailyrewards.status.itemStackSerialized=Item serialized
+
 oxygen_dailyrewards.message.dailyRewardAvailable=You have available daily reward: 
 oxygen_dailyrewards.message.clickHere=click here

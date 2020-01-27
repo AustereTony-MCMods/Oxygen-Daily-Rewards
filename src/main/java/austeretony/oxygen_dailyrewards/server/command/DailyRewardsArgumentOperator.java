@@ -11,7 +11,10 @@ import austeretony.oxygen_core.common.api.OxygenHelperCommon;
 import austeretony.oxygen_core.common.command.ArgumentExecutor;
 import austeretony.oxygen_core.common.item.ItemStackWrapper;
 import austeretony.oxygen_core.common.util.JsonUtils;
+import austeretony.oxygen_core.server.api.OxygenHelperServer;
 import austeretony.oxygen_dailyrewards.common.main.DailyRewardsMain;
+import austeretony.oxygen_dailyrewards.common.main.EnumDailyRewardsStatusMessage;
+import austeretony.oxygen_dailyrewards.server.DailyRewardsManagerServer;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -33,7 +36,10 @@ public class DailyRewardsArgumentOperator implements ArgumentExecutor {
             EntityPlayerMP senderPlayerMP = null;
             if (sender instanceof EntityPlayerMP)
                 senderPlayerMP = CommandBase.getCommandSenderAsPlayer(sender);
-            if (args[1].equals("-write-stack")) {
+            if (args[1].equals("-reload-rewards")) {
+                DailyRewardsManagerServer.instance().reloadRewards();
+                OxygenHelperServer.sendStatusMessage(senderPlayerMP, DailyRewardsMain.DAILY_REWARDS_MOD_INDEX, EnumDailyRewardsStatusMessage.DAILY_REWARDS_RELOADED.ordinal());
+            } else if (args[1].equals("-write-stack")) {
                 if (args.length == 3) {
                     if (!(sender instanceof EntityPlayerMP))
                         throw new WrongUsageException("Command available only for player!");
@@ -49,6 +55,7 @@ public class DailyRewardsArgumentOperator implements ArgumentExecutor {
                         } catch (IOException exception) {
                             DailyRewardsMain.LOGGER.error("ItemStack writing failure!", exception);
                         }
+                        OxygenHelperServer.sendStatusMessage(senderPlayerMP, DailyRewardsMain.DAILY_REWARDS_MOD_INDEX, EnumDailyRewardsStatusMessage.ITEMSTACK_SERIALIZED.ordinal());
                     } else
                         throw new WrongUsageException("Main hand is empty!"); 
                 }
