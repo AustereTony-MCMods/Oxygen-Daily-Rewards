@@ -1,2 +1,6 @@
-0.9.0b [2020-01-23]
+0.10.1b [2020-01-27]
++Fixed rewards loading. Now daily rewards will be loaded on server start.
++Added command for reloading rewards ingame: "/oxygenop dailyrewards -reload-rewards". 
+
+0.10.0b [2020-01-23]
 +Initial release.
