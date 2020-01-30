@@ -1,6 +1,19 @@
+0.10.2b [2020-01-30]
++ The new API for working with timestamps has been moved to Core.
++ Improved rewards reloading algorithm when a new month arrives while the server is running.
++ Improved algorithms for checking the availability of daily rewards.
++ Added client settings:
+  Common
+  - the ability to open the rewards menu through the general menu (Oxygen Menu)
+ 
+  Interface
+  - menu alignment
+
++ Fixed problems with displaying rewards for the current week in the menu.
+
 0.10.1b [2020-01-27]
-+Fixed rewards loading. Now daily rewards will be loaded on server start.
-+Added command for reloading rewards ingame: "/oxygenop dailyrewards -reload-rewards". 
++ Fixed rewards loading. Now daily rewards will be loaded on server start.
++ Added command for reloading rewards ingame: "/oxygenop dailyrewards -reload-rewards". 
 
 0.10.0b [2020-01-23]
-+Initial release.
++ Initial release.
