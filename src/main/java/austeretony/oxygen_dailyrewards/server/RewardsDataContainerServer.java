@@ -19,6 +19,7 @@ import austeretony.oxygen_core.common.api.OxygenHelperCommon;
 import austeretony.oxygen_core.common.item.ItemStackWrapper;
 import austeretony.oxygen_core.common.main.OxygenMain;
 import austeretony.oxygen_core.common.util.JsonUtils;
+import austeretony.oxygen_core.server.api.TimeHelperServer;
 import austeretony.oxygen_dailyrewards.common.main.DailyRewardsMain;
 import austeretony.oxygen_dailyrewards.common.network.client.CPSyncRewardsData;
 import austeretony.oxygen_dailyrewards.common.reward.EnumReward;
@@ -42,7 +43,7 @@ public class RewardsDataContainerServer {
     }
 
     public void loadRewardsData() {
-        Month currentMonth = Month.of(this.manager.getCurrentMonth());
+        Month currentMonth = TimeHelperServer.getZonedDateTime().getMonth();
 
         String 
         monthName = currentMonth.getDisplayName(TextStyle.FULL, Locale.ENGLISH),

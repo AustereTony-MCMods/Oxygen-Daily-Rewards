@@ -3,17 +3,15 @@ package austeretony.oxygen_dailyrewards.server;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.time.Instant;
-import java.time.Period;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import austeretony.oxygen_core.common.persistent.AbstractPersistentData;
 import austeretony.oxygen_core.common.util.StreamUtils;
 import austeretony.oxygen_core.server.api.PrivilegesProviderServer;
+import austeretony.oxygen_core.server.api.TimeHelperServer;
 import austeretony.oxygen_dailyrewards.common.config.DailyRewardsConfig;
 import austeretony.oxygen_dailyrewards.common.main.EnumDailyRewardsPrivilege;
-import austeretony.oxygen_dailyrewards.server.test.time.TimeHelperServer;
 import io.netty.buffer.ByteBuf;
 
 public class RewardsPlayerDataServer extends AbstractPersistentData {
@@ -35,13 +33,11 @@ public class RewardsPlayerDataServer extends AbstractPersistentData {
             return false;
 
         ZonedDateTime 
-        currentServerTime = TimeHelperServer.getZonedDateTime(),
-        lastTimePlayerRewarded = ZonedDateTime.ofInstant(Instant.ofEpochMilli(this.lastRewardTimeMillis), TimeHelperServer.getZoneId());
+        currentTime = TimeHelperServer.getZonedDateTime(),
+        lastTimePlayerRewarded = TimeHelperServer.getZonedDateTime(this.lastRewardTimeMillis),
+        nextRewardTime = lastTimePlayerRewarded.plusDays(1L).withHour(DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt()).withMinute(0).withSecond(0);
 
-        int days = Period.between(lastTimePlayerRewarded.toLocalDate(), currentServerTime.toLocalDate()).getDays();
-        if (days == 1)
-            return currentServerTime.getHour() >= DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt();
-            return days > 1;
+        return currentTime.compareTo(nextRewardTime) > 0;
     }
 
     public void rewarded() {

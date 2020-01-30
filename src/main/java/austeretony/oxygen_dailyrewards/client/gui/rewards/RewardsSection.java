@@ -14,10 +14,10 @@ import austeretony.alternateui.screen.framework.GUIElementsFramework;
 import austeretony.oxygen_core.client.api.ClientReference;
 import austeretony.oxygen_core.client.api.EnumBaseGUISetting;
 import austeretony.oxygen_core.client.api.PrivilegesProviderClient;
+import austeretony.oxygen_core.client.api.TimeHelperClient;
 import austeretony.oxygen_core.client.gui.elements.OxygenButton;
 import austeretony.oxygen_core.client.gui.elements.OxygenTextLabel;
 import austeretony.oxygen_dailyrewards.client.DailyRewardsManagerClient;
-import austeretony.oxygen_dailyrewards.client.test.time.TimeHelperClient;
 import austeretony.oxygen_dailyrewards.common.config.DailyRewardsConfig;
 import austeretony.oxygen_dailyrewards.common.main.EnumDailyRewardsPrivilege;
 import austeretony.oxygen_dailyrewards.common.reward.Reward;
@@ -72,7 +72,7 @@ public class RewardsSection extends AbstractGUISection {
         this.rewardClaimed = !DailyRewardsManagerClient.instance().getPlayerData().isRewardAvailable();
         this.daysRewarded = DailyRewardsManagerClient.instance().getPlayerData().getDaysRewarded();
 
-        this.listedWeek = (this.daysRewarded + 1) / WIDGETS_PER_LIST;
+        this.listedWeek = this.daysRewarded / WIDGETS_PER_LIST;
         this.listRewards(this.listedWeek * WIDGETS_PER_LIST + 1);
 
         this.updateButtonsState();

@@ -1,3 +1,10 @@
+oxygen_dailyrewards.gui.settings.module.dailyrewards=Daily Rewards
+
+oxygen_dailyrewards.gui.settings.option.addDailyRewardsMenu=Daily Rewards Menu
+oxygen_dailyrewards.gui.settings.option.dailyRewardsMenuAlignment=Daily Rewards Menu
+
+oxygen_dailyrewards.gui.dailyrewards.menu.title=Daily Rewards
+
 oxygen_dailyrewards.gui.dailyrewards.title=Daily Rewards: %s
 oxygen_dailyrewards.gui.dailyrewards.rewardDay=Day %s
 oxygen_dailyrewards.gui.dailyrewards.rewardAvailable=Available

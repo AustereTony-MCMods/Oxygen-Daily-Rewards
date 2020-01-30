@@ -8,10 +8,10 @@ import java.util.UUID;
 import austeretony.oxygen_core.common.api.CommonReference;
 import austeretony.oxygen_core.common.main.OxygenMain;
 import austeretony.oxygen_core.server.api.OxygenHelperServer;
+import austeretony.oxygen_core.server.api.TimeHelperServer;
 import austeretony.oxygen_dailyrewards.common.main.DailyRewardsMain;
 import austeretony.oxygen_dailyrewards.common.main.EnumDailyRewardsStatusMessage;
 import austeretony.oxygen_dailyrewards.common.network.client.CPSyncPlayerData;
-import austeretony.oxygen_dailyrewards.server.test.time.TimeHelperServer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -32,7 +32,6 @@ public class PlayersDataManagerServer {
         if (playerData == null)
             playerData = this.manager.getPlayerDataContainer().createPlayerData(playerUUID);
         OxygenMain.network().sendTo(new CPSyncPlayerData(
-                TimeHelperServer.getZoneId().getId(),
                 playerData.getDaysRewarded(), 
                 playerData.getLastRewardTimeMillis()), playerMP);
 
@@ -71,7 +70,6 @@ public class PlayersDataManagerServer {
                 playerData.setChanged(true);
 
                 OxygenMain.network().sendTo(new CPSyncPlayerData(
-                        TimeHelperServer.getZoneId().getId(),
                         playerData.getDaysRewarded(), 
                         playerData.getLastRewardTimeMillis()), playerMP);
 

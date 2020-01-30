@@ -1,7 +1,5 @@
 package austeretony.oxygen_dailyrewards.client;
 
-import austeretony.oxygen_dailyrewards.client.test.time.TimeManagerClient;
-
 public class DailyRewardsManagerClient {
 
     private static DailyRewardsManagerClient instance;
@@ -12,14 +10,9 @@ public class DailyRewardsManagerClient {
 
     private final RewardsMenuManager menuManager;
 
-    //TODO Move to Core
-    private final TimeManagerClient timeManager;
-
     private DailyRewardsManagerClient() {
         this.rewardsDataContainer = new RewardsDataContainerClient(this);
         this.menuManager = new RewardsMenuManager(this);
-        //TODO Move to Core
-        this.timeManager = new TimeManagerClient(this);
     }
 
     public static void create() {
@@ -41,10 +34,5 @@ public class DailyRewardsManagerClient {
 
     public RewardsMenuManager getMenuManager() {
         return this.menuManager;
-    }
-
-    //TODO Move to Core
-    public TimeManagerClient getTimeManager() {
-        return this.timeManager;
     }
 }

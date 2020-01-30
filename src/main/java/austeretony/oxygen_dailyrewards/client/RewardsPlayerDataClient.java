@@ -1,12 +1,11 @@
 package austeretony.oxygen_dailyrewards.client;
 
 import java.time.Duration;
-import java.time.Instant;
-import java.time.Period;
 import java.time.ZonedDateTime;
 
 import austeretony.oxygen_core.client.api.PrivilegesProviderClient;
-import austeretony.oxygen_dailyrewards.client.test.time.TimeHelperClient;
+import austeretony.oxygen_core.client.api.TimeHelperClient;
+import austeretony.oxygen_core.common.main.OxygenMain;
 import austeretony.oxygen_dailyrewards.common.config.DailyRewardsConfig;
 import austeretony.oxygen_dailyrewards.common.main.DailyRewardsMain;
 import austeretony.oxygen_dailyrewards.common.main.EnumDailyRewardsPrivilege;
@@ -30,10 +29,10 @@ public class RewardsPlayerDataClient {
         this.lastRewardTimeMillis = lastRewardTimeMillis;
 
         //TODO DEBUG
-        ZonedDateTime serverRewardTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(this.lastRewardTimeMillis), TimeHelperClient.getServerZoneId());
+        ZonedDateTime serverRewardTime = TimeHelperClient.getServerZonedDateTime(this.lastRewardTimeMillis);
         DailyRewardsMain.LOGGER.info("Player data synchronized - days rewarded this month: {}, last reward time: {}",  
                 this.daysRewarded, 
-                DailyRewardsMain.DEBUG_DATE_TIME_FORMATTER.format(serverRewardTime));
+                OxygenMain.DEBUG_DATE_TIME_FORMATTER.format(serverRewardTime));
     }
 
     public boolean isRewardAvailable() {        
@@ -44,24 +43,18 @@ public class RewardsPlayerDataClient {
 
         ZonedDateTime 
         currentServerTime = TimeHelperClient.getServerZonedDateTime(),
-        lastTimePlayerRewarded = ZonedDateTime.ofInstant(Instant.ofEpochMilli(this.lastRewardTimeMillis), TimeHelperClient.getServerZoneId());
+        lastTimePlayerRewarded = TimeHelperClient.getServerZonedDateTime(this.lastRewardTimeMillis),
+        nextRewardTime = lastTimePlayerRewarded.plusDays(1L).withHour(DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt()).withMinute(0).withSecond(0);
 
-        int days = Period.between(lastTimePlayerRewarded.toLocalDate(), currentServerTime.toLocalDate()).getDays();
-        if (days == 1)
-            return currentServerTime.getHour() >= DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt();
-            return days > 1;
+        return currentServerTime.compareTo(nextRewardTime) > 0;
     }
 
     public Duration getTimeLeftUntilNextReward() {
         ZonedDateTime 
         currentServerTime = TimeHelperClient.getServerZonedDateTime(),
-        lastTimePlayerRewarded = ZonedDateTime.ofInstant(Instant.ofEpochMilli(this.lastRewardTimeMillis), TimeHelperClient.getServerZoneId());
+        lastTimePlayerRewarded = TimeHelperClient.getServerZonedDateTime(this.lastRewardTimeMillis),
+        nextRewardTime = lastTimePlayerRewarded.plusDays(1L).withHour(DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt()).withMinute(0).withSecond(0);
 
-        ZonedDateTime nextRewardTime = ZonedDateTime.of(currentServerTime.getYear(), currentServerTime.getMonthValue(), currentServerTime.getDayOfMonth(), DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt(), 0, 0, 0, TimeHelperClient.getServerZoneId());
-
-        if (lastTimePlayerRewarded.isBefore(nextRewardTime))
-            return Duration.between(currentServerTime, nextRewardTime);
-        else
-            return Duration.between(currentServerTime, nextRewardTime.plusDays(1L));
+        return Duration.between(currentServerTime, nextRewardTime);
     }
 }

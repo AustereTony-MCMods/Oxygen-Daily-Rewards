@@ -1,3 +1,8 @@
+oxygen_dailyrewards.gui.settings.option.addDailyRewardsMenu=Меню Ежедневных Наград
+oxygen_dailyrewards.gui.settings.option.dailyRewardsMenuAlignment=Меню Ежедневных Наград
+
+oxygen_dailyrewards.gui.dailyrewards.menu.title=Ежедневные Награды
+
 oxygen_dailyrewards.gui.dailyrewards.title=Ежедневные Награды: %s
 oxygen_dailyrewards.gui.dailyrewards.rewardDay=День %s
 oxygen_dailyrewards.gui.dailyrewards.rewardAvailable=Доступно

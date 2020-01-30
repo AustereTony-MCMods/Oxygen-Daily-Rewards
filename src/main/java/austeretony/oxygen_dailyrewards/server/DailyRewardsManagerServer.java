@@ -1,13 +1,19 @@
 package austeretony.oxygen_dailyrewards.server;
 
+import java.time.Duration;
+import java.time.Month;
+import java.time.ZonedDateTime;
+import java.time.format.TextStyle;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import austeretony.oxygen_core.common.api.CommonReference;
 import austeretony.oxygen_core.server.api.OxygenHelperServer;
-import austeretony.oxygen_dailyrewards.server.test.time.TimeHelperServer;
-import austeretony.oxygen_dailyrewards.server.test.time.TimeManagerServer;
+import austeretony.oxygen_core.server.api.TimeHelperServer;
+import austeretony.oxygen_dailyrewards.common.config.DailyRewardsConfig;
+import austeretony.oxygen_dailyrewards.common.main.DailyRewardsMain;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 public class DailyRewardsManagerServer {
@@ -20,17 +26,7 @@ public class DailyRewardsManagerServer {
 
     private final PlayersDataManagerServer playerDataManager;
 
-    //TODO Move to Core
-    private final TimeManagerServer timeManager;
-
-    private int currentMonth;
-
     private DailyRewardsManagerServer() {      
-        //TODO Move to Core
-        this.timeManager = new TimeManagerServer(this);
-
-        this.currentMonth = this.timeManager.getZonedDateTime().getMonthValue();
-
         this.rewardsDataContainer = new RewardsDataContainerServer(this);
         this.playerDataContainer = new RewardsPlayerDataContainerServer(this);
         this.playerDataManager = new PlayersDataManagerServer(this);
@@ -41,29 +37,25 @@ public class DailyRewardsManagerServer {
     }
 
     private void scheduleRepeatableProcesses() {
-        OxygenHelperServer.getSchedulerExecutorService().scheduleAtFixedRate(
-                ()->this.validateRewards(), 1L, 1L, TimeUnit.HOURS);
-    }
+        //scheduling rewards reloading when new month starts
+        ZonedDateTime 
+        currentTime = TimeHelperServer.getZonedDateTime(),
+        reloadingTime = currentTime.withDayOfMonth(1).withHour(DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt()).withMinute(0).withSecond(0);
 
-    private void validateRewards() {
-        int month = TimeHelperServer.getZonedDateTime().getMonthValue();
-        if (this.currentMonth != month)
-            this.reloadRewards();
-        this.currentMonth = month;
-    }
+        if (currentTime.compareTo(reloadingTime) > 0)
+            reloadingTime = reloadingTime.plusMonths(1L);
 
-    public void reloadRewards() {
-        Runnable reloadingTask = ()->{
-            Future future = OxygenHelperServer.getExecutionManager().addIOTask(()->this.rewardsDataContainer.loadRewardsData());
-            try {
-                future.get();
-                OxygenHelperServer.getOnlinePlayersUUIDs().forEach(
-                        (playerUUID)->this.rewardsDataContainer.syncRewardsData(CommonReference.playerByUUID(playerUUID)));
-            } catch (ExecutionException | InterruptedException exception) {
-                exception.printStackTrace();
-            }
-        };
-        OxygenHelperServer.addRoutineTask(reloadingTask);
+        Month nextMonth = reloadingTime.getMonth();
+        int nextMonthLength = reloadingTime.toLocalDate().isLeapYear() ? nextMonth.maxLength() : nextMonth.minLength();
+
+        long initalDelay = Duration.between(currentTime, reloadingTime).getSeconds();
+
+        OxygenHelperServer.getSchedulerExecutorService().scheduleAtFixedRate(()->this.reloadRewards(), 
+                initalDelay, 
+                TimeUnit.DAYS.toSeconds(nextMonthLength), 
+                TimeUnit.SECONDS);
+
+        DailyRewardsMain.LOGGER.info("Scheduled rewards reloading for <{}> at: {}", nextMonth.getDisplayName(TextStyle.FULL, Locale.ENGLISH), reloadingTime.toString());
     }
 
     public static void create() {
@@ -78,10 +70,6 @@ public class DailyRewardsManagerServer {
         return instance;
     }
 
-    public int getCurrentMonth() {
-        return this.currentMonth;
-    }
-
     public RewardsDataContainerServer getRewardsDataContainer() {
         return this.rewardsDataContainer;
     }
@@ -94,11 +82,6 @@ public class DailyRewardsManagerServer {
         return this.playerDataManager;
     }
 
-    //TODO Move to Core
-    public TimeManagerServer getTimeManager() {
-        return this.timeManager;
-    }
-
     public void worldLoaded() {
         OxygenHelperServer.addIOTask(()->this.rewardsDataContainer.loadRewardsData());
     }
@@ -106,5 +89,20 @@ public class DailyRewardsManagerServer {
     public void onPlayerLoaded(EntityPlayerMP playerMP) {
         this.rewardsDataContainer.syncRewardsData(playerMP);
         this.playerDataManager.onPlayerLoaded(playerMP);
+    }
+
+    public void reloadRewards() {
+        Runnable reloadingTask = ()->{
+            Future future = OxygenHelperServer.getExecutionManager().addIOTask(()->this.rewardsDataContainer.loadRewardsData());
+            try {
+                future.get();
+                OxygenHelperServer.getOnlinePlayersUUIDs().forEach(
+                        (playerUUID)->this.rewardsDataContainer.syncRewardsData(CommonReference.playerByUUID(playerUUID)));
+            } catch (ExecutionException | InterruptedException exception) {
+                exception.printStackTrace();
+            }
+            DailyRewardsMain.LOGGER.info("Daily rewards reloaded.");
+        };
+        OxygenHelperServer.addRoutineTask(reloadingTask);
     }
 }
