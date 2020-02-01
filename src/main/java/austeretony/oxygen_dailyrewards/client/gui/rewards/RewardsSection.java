@@ -57,7 +57,8 @@ public class RewardsSection extends AbstractGUISection {
             this.monthLength = 29;
 
         this.addElement(new RewardsBackgroundFiller(0, 0, this.getWidth(), this.getHeight()));
-        this.addElement(new OxygenTextLabel(4, 12, ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.title", month.getDisplayName(TextStyle.FULL, Locale.ROOT)), EnumBaseGUISetting.TEXT_TITLE_SCALE.get().asFloat(), EnumBaseGUISetting.TEXT_ENABLED_COLOR.get().asInt()));
+        String monthName = ClientReference.localize("oxygen_core.month." + month.getDisplayName(TextStyle.FULL, Locale.ROOT).toLowerCase());
+        this.addElement(new OxygenTextLabel(4, 12, ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.title", monthName), EnumBaseGUISetting.TEXT_TITLE_SCALE.get().asFloat(), EnumBaseGUISetting.TEXT_ENABLED_COLOR.get().asInt()));
 
         this.addElement(this.claimButton = new OxygenButton(6, this.getHeight() - 11, 40, 10, ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.claimButton")).disable());     
         this.claimButton.setKeyPressListener(Keyboard.KEY_E, ()->this.claimReward());

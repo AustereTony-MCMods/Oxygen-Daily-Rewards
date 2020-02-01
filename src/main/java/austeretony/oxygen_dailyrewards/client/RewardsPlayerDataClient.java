@@ -28,7 +28,6 @@ public class RewardsPlayerDataClient {
         this.daysRewarded = daysRewarded;
         this.lastRewardTimeMillis = lastRewardTimeMillis;
 
-        //TODO DEBUG
         ZonedDateTime serverRewardTime = TimeHelperClient.getServerZonedDateTime(this.lastRewardTimeMillis);
         DailyRewardsMain.LOGGER.info("Player data synchronized - days rewarded this month: {}, last reward time: {}",  
                 this.daysRewarded, 

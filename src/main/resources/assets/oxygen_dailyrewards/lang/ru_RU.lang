@@ -25,3 +25,16 @@ oxygen_dailyrewards.status.itemStackSerialized=Предмет сериализо
 
 oxygen_dailyrewards.message.dailyRewardAvailable=Доступна ежедневная награда:
 oxygen_dailyrewards.message.clickHere=кликнуть здесь
+
+oxygen_core.month.january=Январь
+oxygen_core.month.february=Февраль
+oxygen_core.month.march=Март
+oxygen_core.month.april=Апрель
+oxygen_core.month.may=Май
+oxygen_core.month.june=Июнь
+oxygen_core.month.july=Июль
+oxygen_core.month.august=Август
+oxygen_core.month.september=Сентябрь
+oxygen_core.month.october=Октябрь
+oxygen_core.month.november=Ноябрь
+oxygen_core.month.december=Декабрь

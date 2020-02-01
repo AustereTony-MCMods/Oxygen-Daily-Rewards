@@ -3,6 +3,7 @@ package austeretony.oxygen_dailyrewards.server;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.time.Period;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -24,6 +25,20 @@ public class RewardsPlayerDataServer extends AbstractPersistentData {
 
     public RewardsPlayerDataServer(String dataPath) {
         this.dataPath = dataPath;
+    }
+
+    public void init() {
+        if (this.lastRewardTimeMillis != 0L) {
+            ZonedDateTime 
+            currentServerTime = TimeHelperServer.getZonedDateTime(),
+            lastTimePlayerRewarded = TimeHelperServer.getZonedDateTime(this.lastRewardTimeMillis);
+
+            if (Period.between(lastTimePlayerRewarded.toLocalDate(), currentServerTime.toLocalDate()).getDays() >= 2)
+                this.rewardedDaysSeries = 0;
+
+            if (lastTimePlayerRewarded.getMonthValue() != currentServerTime.getMonthValue())
+                this.daysRewarded = 0;
+        }
     }
 
     public boolean isRewardAvailable(UUID playerUUID) {

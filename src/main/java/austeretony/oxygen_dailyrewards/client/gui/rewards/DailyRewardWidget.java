@@ -143,14 +143,14 @@ public class DailyRewardWidget extends GUISimpleElement<DailyRewardWidget> {
             if (this.special) {
                 GlStateManager.enableBlend(); 
                 this.mc.getTextureManager().bindTexture(DailyRewardsMenuScreen.SPECIAL_ICON);                        
-                GUIAdvancedElement.drawCustomSizedTexturedRect(this.getWidth() - 10, 2, 0, 0, 8, 8, 8, 8);     
+                GUIAdvancedElement.drawCustomSizedTexturedRect(this.getWidth() - 8, 2, 0, 0, 6, 6, 6, 6);     
                 GlStateManager.disableBlend(); 
             }
 
             if (this.locked && !this.unreachable && !this.rewarded) {
                 GlStateManager.enableBlend(); 
                 this.mc.getTextureManager().bindTexture(DailyRewardsMenuScreen.LOCKED_ICON);                        
-                GUIAdvancedElement.drawCustomSizedTexturedRect(this.getWidth() - 10, this.getHeight() - 20, 0, 0, 8, 8, 8, 8);     
+                GUIAdvancedElement.drawCustomSizedTexturedRect(this.getWidth() - 8, this.getHeight() - 18, 0, 0, 6, 6, 6, 6);     
                 GlStateManager.disableBlend(); 
             }
 
