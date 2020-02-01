@@ -1,3 +1,8 @@
+0.10.3b [2020-02-01]
++ Fixed a visual bug in the rewards menu, which led to incorrect display of received rewards on the first day of the month.
++ Added the ability to localize the names of the months.
++ Minor improvements for menu widgets.
+
 0.10.2b [2020-01-30]
 + The new API for working with timestamps has been moved to Core.
 + Improved rewards reloading algorithm when a new month arrives while the server is running.
