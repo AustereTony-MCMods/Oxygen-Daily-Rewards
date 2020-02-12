@@ -4,21 +4,20 @@ import austeretony.alternateui.screen.core.GUIAdvancedElement;
 import austeretony.alternateui.screen.core.GUISimpleElement;
 import austeretony.alternateui.util.EnumGUIAlignment;
 import austeretony.oxygen_core.client.api.ClientReference;
-import austeretony.oxygen_core.client.api.EnumBaseClientSetting;
 import austeretony.oxygen_core.client.api.EnumBaseGUISetting;
 import austeretony.oxygen_core.client.api.OxygenHelperClient;
 import austeretony.oxygen_core.client.currency.CurrencyProperties;
 import austeretony.oxygen_core.client.gui.OxygenGUIUtils;
 import austeretony.oxygen_dailyrewards.common.reward.Reward;
+import austeretony.oxygen_dailyrewards.common.reward.RewardCommand;
 import austeretony.oxygen_dailyrewards.common.reward.RewardCurrency;
 import austeretony.oxygen_dailyrewards.common.reward.RewardItem;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 
 public class DailyRewardWidget extends GUISimpleElement<DailyRewardWidget> {
-
-    private final Reward reward;
 
     private final String dayStr, descriptionStr, amountStr, rewardAvailableStr, nextRewardStr;
 
@@ -26,13 +25,13 @@ public class DailyRewardWidget extends GUISimpleElement<DailyRewardWidget> {
 
     private ItemStack itemStack;
 
-    private CurrencyProperties properties;
+    private CurrencyProperties currencyProperties;
+
+    private ResourceLocation iconTexture;
 
     public DailyRewardWidget(int xPosition, int yPosition, Reward reward, boolean rewarded, boolean nextReward, boolean locked, boolean unreachable) {
         this.setPosition(xPosition, yPosition);
-        this.setSize(48, 64);
-
-        this.reward = reward;
+        this.setSize(48, 48);
 
         this.dayStr = ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.rewardDay", reward.getDay());
         this.descriptionStr = ClientReference.localize(reward.getDescription());
@@ -49,18 +48,22 @@ public class DailyRewardWidget extends GUISimpleElement<DailyRewardWidget> {
 
         switch (reward.getType()) {
         case ITEM:
-            this.itemStack = ((RewardItem) this.reward).getStackWrapper().getCachedItemStack();
-            this.setDisplayText(EnumBaseClientSetting.ENABLE_RARITY_COLORS.get().asBoolean() ? this.itemStack.getRarity().rarityColor + this.itemStack.getDisplayName() : this.itemStack.getDisplayName());
+            this.itemStack = ((RewardItem) reward).getStackWrapper().getCachedItemStack();
             break;
         case CURRENCY:
-            this.properties = OxygenHelperClient.getCurrencyProperties(((RewardCurrency) this.reward).getCurrencyIndex());
-            this.setDisplayText(this.properties.getLocalizedName());
+            this.currencyProperties = OxygenHelperClient.getCurrencyProperties(((RewardCurrency) reward).getCurrencyIndex());
+            this.initTooltip(this.currencyProperties.getLocalizedName(), EnumBaseGUISetting.TOOLTIP_TEXT_COLOR.get().asInt(), EnumBaseGUISetting.TOOLTIP_BACKGROUND_COLOR.get().asInt(), EnumBaseGUISetting.TEXT_TOOLTIP_SCALE.get().asFloat());
+            break;
+        case COMMAND:
+            this.iconTexture = ((RewardCommand) reward).getIconTexture();
+            this.initTooltip(((RewardCommand) reward).getTooltip(), EnumBaseGUISetting.TOOLTIP_TEXT_COLOR.get().asInt(), EnumBaseGUISetting.TOOLTIP_BACKGROUND_COLOR.get().asInt(), EnumBaseGUISetting.TEXT_TOOLTIP_SCALE.get().asFloat());
             break;
         }
 
         this.setDynamicBackgroundColor(EnumBaseGUISetting.ELEMENT_ENABLED_COLOR.get().asInt(), EnumBaseGUISetting.INACTIVE_ELEMENT_COLOR.get().asInt(), EnumBaseGUISetting.ELEMENT_HOVERED_COLOR.get().asInt());
         this.setTextDynamicColor(EnumBaseGUISetting.TEXT_ENABLED_COLOR.get().asInt(), EnumBaseGUISetting.TEXT_DARK_ENABLED_COLOR.get().asInt(), EnumBaseGUISetting.ACTIVE_ELEMENT_COLOR.get().asInt());
         this.setStaticBackgroundColor(EnumBaseGUISetting.STATUS_ELEMENT_COLOR.get().asInt());
+        this.setDebugColor(EnumBaseGUISetting.BACKGROUND_ADDITIONAL_COLOR.get().asInt());
         this.setTextScale(EnumBaseGUISetting.TEXT_SUB_SCALE.get().asFloat());
         this.enableFull();
     }
@@ -73,7 +76,6 @@ public class DailyRewardWidget extends GUISimpleElement<DailyRewardWidget> {
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
             drawRect(0, 0, this.getWidth(), this.getHeight(), this.getEnabledBackgroundColor());
-            drawRect(0, this.getHeight() - 10, this.getWidth(), this.getHeight(), this.getHoveredBackgroundColor());
 
             if (this.nextReward) {
                 if (!this.rewarded && !this.locked) {
@@ -81,12 +83,6 @@ public class DailyRewardWidget extends GUISimpleElement<DailyRewardWidget> {
                     OxygenGUIUtils.drawGradientRect(0.0D, 0.0D, this.getWidth(), this.getHeight() - 10, 0x00000000, this.getStaticBackgroundColor(), EnumGUIAlignment.TOP);
                     GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
                 }
-
-                GlStateManager.pushMatrix();           
-                GlStateManager.translate(2.0F, 9.0F, 0.0F);            
-                GlStateManager.scale(this.getTextScale() - 0.1F, this.getTextScale() - 0.1F, 0.0F);   
-                this.mc.fontRenderer.drawString(!this.rewarded && !this.locked ? this.rewardAvailableStr : this.nextRewardStr, 0, 0, this.getDisabledTextColor(), false); 
-                GlStateManager.popMatrix();
             } else if (this.unreachable) {
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
                 OxygenGUIUtils.drawGradientRect(0.0D, 0.0D, this.getWidth(), this.getHeight() - 10, 0x00000000, this.getDisabledBackgroundColor(), EnumGUIAlignment.TOP);
@@ -103,40 +99,47 @@ public class DailyRewardWidget extends GUISimpleElement<DailyRewardWidget> {
             this.mc.fontRenderer.drawString(this.dayStr, 0, 0, this.getEnabledTextColor(), false); 
             GlStateManager.popMatrix();
 
-            GlStateManager.pushMatrix();           
-            GlStateManager.translate((this.getWidth() - this.textWidth(this.amountStr, this.getTextScale() - 0.05F)) / 2.0F, 38.0F, 0.0F);            
-            GlStateManager.scale(this.getTextScale() - 0.05F, this.getTextScale() - 0.05F, 0.0F);   
-            this.mc.fontRenderer.drawString(this.amountStr, 0, 0, this.getEnabledTextColor(), false); 
-            GlStateManager.popMatrix();
-
-            GlStateManager.pushMatrix();           
-            GlStateManager.translate(2.0F, this.getHeight() - 16.0F, 0.0F);            
-            GlStateManager.scale(this.getTextScale() - 0.1F, this.getTextScale() - 0.1F, 0.0F);   
-            this.mc.fontRenderer.drawString(this.descriptionStr, 0, 0, this.getDisabledTextColor(), false); 
-            GlStateManager.popMatrix();
-
-            if (this.itemStack != null) {
-                RenderHelper.enableGUIStandardItemLighting();            
-                GlStateManager.enableDepth();
-                this.itemRender.renderItemAndEffectIntoGUI(this.itemStack, 16, 19);    
-                GlStateManager.disableDepth();
-                RenderHelper.disableStandardItemLighting();
-            } else if (this.properties != null) {
-                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-
-                GlStateManager.enableBlend(); 
-                this.mc.getTextureManager().bindTexture(this.properties.getIcon());
-                GUIAdvancedElement.drawCustomSizedTexturedRect(16 + this.properties.getXOffset() * 2, 19 + this.properties.getYOffset() * 2, 0, 0, this.properties.getIconWidth() * 2, this.properties.getIconHeight() * 2, this.properties.getIconWidth() * 2, this.properties.getIconHeight() * 2);                 
-                GlStateManager.disableBlend();      
+            if (this.iconTexture == null) {
+                GlStateManager.pushMatrix();           
+                GlStateManager.translate((this.getWidth() - this.textWidth(this.amountStr, this.getTextScale() - 0.1F)) / 2.0F, this.itemStack != null ? 34.0F : 30.0F, 0.0F);            
+                GlStateManager.scale(this.getTextScale() - 0.1F, this.getTextScale() - 0.1F, 0.0F);   
+                this.mc.fontRenderer.drawString(this.amountStr, 0, 0, this.getEnabledTextColor(), false); 
+                GlStateManager.popMatrix();
             }
 
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
+            if (this.itemStack != null) {
+                RenderHelper.enableGUIStandardItemLighting();            
+                GlStateManager.enableDepth();
+                this.itemRender.renderItemAndEffectIntoGUI(this.itemStack, 16, 16);    
+                GlStateManager.disableDepth();
+                RenderHelper.disableStandardItemLighting();
+            } else if (this.currencyProperties != null) {
+                GlStateManager.enableBlend(); 
+                this.mc.getTextureManager().bindTexture(this.currencyProperties.getIcon());
+                GUIAdvancedElement.drawCustomSizedTexturedRect(20 + this.currencyProperties.getXOffset(), 20 + this.currencyProperties.getYOffset(), 0, 0, this.currencyProperties.getIconWidth(), this.currencyProperties.getIconHeight(), this.currencyProperties.getIconWidth(), this.currencyProperties.getIconHeight());                 
+                GlStateManager.disableBlend();   
+            } else if (this.iconTexture != null) {
+                GlStateManager.enableBlend(); 
+                this.mc.getTextureManager().bindTexture(this.iconTexture);
+                GUIAdvancedElement.drawCustomSizedTexturedRect(0, 0, 0, 0, 48, 48, 48, 48);                 
+                GlStateManager.disableBlend();  
+            }
+
             GlStateManager.pushMatrix();           
-            GlStateManager.translate(2.0F, this.getHeight() - 7.0F, 0.0F);            
+            GlStateManager.translate(2.0F, this.getHeight() - 6.0F, 0.0F);            
             GlStateManager.scale(this.getTextScale() - 0.1F, this.getTextScale() - 0.1F, 0.0F);   
-            this.mc.fontRenderer.drawString(this.getDisplayText(), 0, 0, this.getEnabledTextColor(), false); 
+            this.mc.fontRenderer.drawString(this.descriptionStr, 0, 0, this.getDisabledTextColor(), false); 
             GlStateManager.popMatrix();
+
+            if (this.nextReward) {
+                GlStateManager.pushMatrix();           
+                GlStateManager.translate(2.0F, 9.0F, 0.0F);            
+                GlStateManager.scale(this.getTextScale() - 0.1F, this.getTextScale() - 0.1F, 0.0F);   
+                this.mc.fontRenderer.drawString(!this.rewarded && !this.locked ? this.rewardAvailableStr : this.nextRewardStr, 0, 0, this.getDisabledTextColor(), false); 
+                GlStateManager.popMatrix();
+            }
 
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
@@ -150,7 +153,7 @@ public class DailyRewardWidget extends GUISimpleElement<DailyRewardWidget> {
             if (this.locked && !this.unreachable && !this.rewarded) {
                 GlStateManager.enableBlend(); 
                 this.mc.getTextureManager().bindTexture(DailyRewardsMenuScreen.LOCKED_ICON);                        
-                GUIAdvancedElement.drawCustomSizedTexturedRect(this.getWidth() - 8, this.getHeight() - 18, 0, 0, 6, 6, 6, 6);     
+                GUIAdvancedElement.drawCustomSizedTexturedRect(this.getWidth() - 8, this.getHeight() - 8, 0, 0, 6, 6, 6, 6);     
                 GlStateManager.disableBlend(); 
             }
 
@@ -161,6 +164,35 @@ public class DailyRewardWidget extends GUISimpleElement<DailyRewardWidget> {
     @Override
     public void drawTooltip(int mouseX, int mouseY) {
         if (this.itemStack != null && mouseX >= this.getX() + 16 && mouseY >= this.getY() + 16 && mouseX < this.getX() + 32 && mouseY < this.getY() + 32)
-            this.screen.drawToolTip(this.itemStack, mouseX + 4, mouseY);
+            this.screen.drawToolTip(this.itemStack, mouseX, mouseY);
+        else if (this.hasTooltip() && mouseX >= this.getX() + 16 && mouseY >= this.getY() + 20 && mouseX < this.getX() + 32 && mouseY < this.getY() + 28) {
+            float 
+            width = this.textWidth(this.getTooltipText(), this.getTooltipScaleFactor()) + 6.0F,
+            height = 9.0F;
+
+            GlStateManager.pushMatrix();            
+            GlStateManager.translate((this.getX() + this.getWidth() / 2.0F) - (width / 2.0F), this.getY() + (this.getHeight() / 2) - 16.0F, 0.0F);            
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);   
+
+            //background
+            drawRect(0, 0, (int) width, (int) height, this.getTooltipBackgroundColor());
+
+            //frame
+            OxygenGUIUtils.drawRect(0.0D, 0.0D, 0.3D, height, this.getDebugColor());
+            OxygenGUIUtils.drawRect(width - 0.4D, 0.0D, width, height, this.getDebugColor());
+            OxygenGUIUtils.drawRect(0.0D, 0.0D, width, 0.4D, this.getDebugColor());
+            OxygenGUIUtils.drawRect(0.0D, height - 0.4D, width, height, this.getDebugColor());
+
+            GlStateManager.pushMatrix();            
+            GlStateManager.translate((width - this.textWidth(this.getTooltipText(), this.getTooltipScaleFactor())) / 2.0F, (height - this.textHeight(this.getTooltipScaleFactor())) / 2.0F + 1.0F, 0.0F);            
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);   
+            GlStateManager.scale(this.getTooltipScaleFactor(), this.getTooltipScaleFactor(), 0.0F);  
+
+            this.mc.fontRenderer.drawString(this.getTooltipText(), 0, 0, this.getTooltipTextColor(), false);
+
+            GlStateManager.popMatrix(); 
+
+            GlStateManager.popMatrix(); 
+        }  
     }
 }

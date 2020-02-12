@@ -29,6 +29,18 @@ public enum EnumReward {
         public Reward read(ByteBuf buffer) {
             return RewardCurrency.read(buffer);
         }
+    },
+    COMMAND() {
+
+        @Override
+        public Reward fromJson(JsonObject jsonObject) {
+            return RewardCommand.fromJson(jsonObject);
+        }
+
+        @Override
+        public Reward read(ByteBuf buffer) {
+            return RewardCommand.read(buffer);
+        }
     };
 
     public abstract Reward fromJson(JsonObject jsonObject);

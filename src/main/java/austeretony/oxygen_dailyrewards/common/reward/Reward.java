@@ -22,8 +22,6 @@ public interface Reward {
 
     boolean isSpecial();
 
-    JsonElement toJson();
-
     void write(ByteBuf buffer);
 
     void rewardPlayer(EntityPlayerMP playerMP); 

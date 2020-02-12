@@ -3,7 +3,7 @@ package austeretony.oxygen_dailyrewards.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import austeretony.oxygen_dailyrewards.common.main.DailyRewardsMain;
+import austeretony.oxygen_core.common.main.OxygenMain;
 import austeretony.oxygen_dailyrewards.common.reward.EnumReward;
 import austeretony.oxygen_dailyrewards.common.reward.Reward;
 import io.netty.buffer.ByteBuf;
@@ -35,7 +35,7 @@ public class RewardsDataContainerClient {
                 enumReward = EnumReward.values()[buffer.readByte()];
                 this.rewards.add(enumReward.read(buffer));
             }
-            DailyRewardsMain.LOGGER.info("Rewards data synchronized.");
+            OxygenMain.LOGGER.info("[Daily Rewards] Rewards data synchronized.");
         } finally {
             if (buffer != null)
                 buffer.release();

@@ -27,30 +27,23 @@ public class RewardsPlayerDataServer extends AbstractPersistentData {
         this.dataPath = dataPath;
     }
 
-    public void init() {
-        if (this.lastRewardTimeMillis != 0L) {
-            ZonedDateTime 
-            currentServerTime = TimeHelperServer.getZonedDateTime(),
-            lastTimePlayerRewarded = TimeHelperServer.getZonedDateTime(this.lastRewardTimeMillis);
-
-            if (Period.between(lastTimePlayerRewarded.toLocalDate(), currentServerTime.toLocalDate()).getDays() >= 2)
-                this.rewardedDaysSeries = 0;
-
-            if (lastTimePlayerRewarded.getMonthValue() != currentServerTime.getMonthValue())
-                this.daysRewarded = 0;
-        }
-    }
-
     public boolean isRewardAvailable(UUID playerUUID) {
-        int maximumRewards = PrivilegesProviderServer.getAsInt(playerUUID, EnumDailyRewardsPrivilege.MAXIMUM_REWARDS_AMOUNT.id(), DailyRewardsConfig.MAXIMUM_REWARDS_AMOUNT.asInt());
-        if (!PrivilegesProviderServer.getAsBoolean(playerUUID, EnumDailyRewardsPrivilege.DAILY_REWARDS_ACCESS.id(), true)
-                || (maximumRewards != - 1 && this.daysRewarded >= maximumRewards))
-            return false;
-
         ZonedDateTime 
         currentTime = TimeHelperServer.getZonedDateTime(),
         lastTimePlayerRewarded = TimeHelperServer.getZonedDateTime(this.lastRewardTimeMillis),
         nextRewardTime = lastTimePlayerRewarded.plusDays(1L).withHour(DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt()).withMinute(0).withSecond(0);
+
+        if (Period.between(lastTimePlayerRewarded.toLocalDate(), currentTime.toLocalDate()).getDays() >= 2)
+            this.rewardedDaysSeries = 0;
+
+        if (lastTimePlayerRewarded.getMonthValue() != currentTime.getMonthValue()
+                && currentTime.getHour() >= DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt())
+            this.daysRewarded = 0;
+
+        int maximumRewards = PrivilegesProviderServer.getAsInt(playerUUID, EnumDailyRewardsPrivilege.MAXIMUM_REWARDS_AMOUNT.id(), DailyRewardsConfig.MAXIMUM_REWARDS_AMOUNT.asInt());
+        if (!PrivilegesProviderServer.getAsBoolean(playerUUID, EnumDailyRewardsPrivilege.DAILY_REWARDS_ACCESS.id(), true)
+                || (maximumRewards != - 1 && this.daysRewarded >= maximumRewards))
+            return false;
 
         return currentTime.compareTo(nextRewardTime) > 0;
     }

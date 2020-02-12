@@ -20,7 +20,6 @@ import austeretony.oxygen_core.common.item.ItemStackWrapper;
 import austeretony.oxygen_core.common.main.OxygenMain;
 import austeretony.oxygen_core.common.util.JsonUtils;
 import austeretony.oxygen_core.server.api.TimeHelperServer;
-import austeretony.oxygen_dailyrewards.common.main.DailyRewardsMain;
 import austeretony.oxygen_dailyrewards.common.network.client.CPSyncRewardsData;
 import austeretony.oxygen_dailyrewards.common.reward.EnumReward;
 import austeretony.oxygen_dailyrewards.common.reward.Reward;
@@ -64,9 +63,9 @@ public class RewardsDataContainerServer {
                 enumReward = EnumReward.valueOf(rewardObject.get("type").getAsString());
                 this.rewards.add(enumReward.fromJson(rewardObject));
             }
-            DailyRewardsMain.LOGGER.info("Successfuly loaded rewards for <{}>.", monthName);
+            OxygenMain.LOGGER.info("[Daily Rewards] Successfuly loaded rewards for <{}>.", monthName);
         } catch (IOException exception) {
-            DailyRewardsMain.LOGGER.error("Rewards data file for <" + monthName + "> is damaged!", exception);
+            OxygenMain.LOGGER.error("[Daily Rewards] Rewards data file for <" + monthName + "> is damaged!", exception);
             exception.printStackTrace();
         }
 
@@ -102,11 +101,11 @@ public class RewardsDataContainerServer {
                 }
                 JsonUtils.createExternalJsonFile(folder, rewardsArray);
             } catch (IOException exception) {
-                DailyRewardsMain.LOGGER.error("Failed to create default reward data file! Path: {}", folder);
+                OxygenMain.LOGGER.error("[Daily Rewards] Failed to create default reward data file! Path: {}", folder);
                 exception.printStackTrace();
             }   
         }
-        DailyRewardsMain.LOGGER.info("Successfuly created default daily rewards data files.");
+        OxygenMain.LOGGER.info("[Daily Rewards] Successfuly created default daily rewards data files.");
     }
 
     private void compressRewardsData() {

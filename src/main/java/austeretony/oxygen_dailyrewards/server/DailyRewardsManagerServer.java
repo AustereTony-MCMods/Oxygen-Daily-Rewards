@@ -10,10 +10,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import austeretony.oxygen_core.common.api.CommonReference;
+import austeretony.oxygen_core.common.main.OxygenMain;
 import austeretony.oxygen_core.server.api.OxygenHelperServer;
 import austeretony.oxygen_core.server.api.TimeHelperServer;
 import austeretony.oxygen_dailyrewards.common.config.DailyRewardsConfig;
-import austeretony.oxygen_dailyrewards.common.main.DailyRewardsMain;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 public class DailyRewardsManagerServer {
@@ -55,7 +55,7 @@ public class DailyRewardsManagerServer {
                 TimeUnit.DAYS.toSeconds(nextMonthLength), 
                 TimeUnit.SECONDS);
 
-        DailyRewardsMain.LOGGER.info("Scheduled rewards reloading for <{}> at: {}", nextMonth.getDisplayName(TextStyle.FULL, Locale.ENGLISH), reloadingTime.toString());
+        OxygenMain.LOGGER.info("[Daily Rewards] Scheduled rewards reloading for <{}> at: {}", nextMonth.getDisplayName(TextStyle.FULL, Locale.ENGLISH), reloadingTime.toString());
     }
 
     public static void create() {
@@ -96,12 +96,12 @@ public class DailyRewardsManagerServer {
             Future future = OxygenHelperServer.getExecutionManager().addIOTask(()->this.rewardsDataContainer.loadRewardsData());
             try {
                 future.get();
-                OxygenHelperServer.getOnlinePlayersUUIDs().forEach(
-                        (playerUUID)->this.rewardsDataContainer.syncRewardsData(CommonReference.playerByUUID(playerUUID)));
             } catch (ExecutionException | InterruptedException exception) {
                 exception.printStackTrace();
             }
-            DailyRewardsMain.LOGGER.info("Daily rewards reloaded.");
+            OxygenHelperServer.getOnlinePlayersUUIDs().forEach(
+                    (playerUUID)->this.rewardsDataContainer.syncRewardsData(CommonReference.playerByUUID(playerUUID)));
+            OxygenMain.LOGGER.info("[Daily Rewards] Daily rewards reloaded.");
         };
         OxygenHelperServer.addRoutineTask(reloadingTask);
     }

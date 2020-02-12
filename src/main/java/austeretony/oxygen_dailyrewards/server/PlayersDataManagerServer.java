@@ -27,7 +27,6 @@ public class PlayersDataManagerServer {
         RewardsPlayerDataServer playerData = this.manager.getPlayerDataContainer().getPlayerData(playerUUID);
         if (playerData == null)
             playerData = this.manager.getPlayerDataContainer().createPlayerData(playerUUID);
-        playerData.init();
 
         OxygenMain.network().sendTo(new CPSyncPlayerData(
                 playerData.getDaysRewarded(), 
@@ -52,6 +51,10 @@ public class PlayersDataManagerServer {
         RewardsPlayerDataServer playerData = this.manager.getPlayerDataContainer().getPlayerData(CommonReference.getPersistentUUID(playerMP));
         if (playerData != null) {
             if (playerData.isRewardAvailable(CommonReference.getPersistentUUID(playerMP))) {
+                DailyRewardsMain.DAILY_REWARDS_LOGGER.info("<{}/{}> [1]: rewarding player for day {}...",
+                        CommonReference.getName(playerMP), 
+                        CommonReference.getPersistentUUID(playerMP),
+                        playerData.getDaysRewarded() + 1);
                 this.manager.getRewardsDataContainer().getDailyReward(playerData.getDaysRewarded() + 1).rewardPlayer(playerMP);
                 playerData.rewarded();
 

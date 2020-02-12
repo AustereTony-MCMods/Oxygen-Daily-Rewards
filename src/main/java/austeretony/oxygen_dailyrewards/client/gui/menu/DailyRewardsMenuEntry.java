@@ -21,7 +21,7 @@ public class DailyRewardsMenuEntry implements OxygenMenuEntry {
 
     @Override
     public int getKeyCode() {
-        return Keyboard.KEY_R;
+        return Keyboard.KEY_COMMA;
     }
 
     @Override

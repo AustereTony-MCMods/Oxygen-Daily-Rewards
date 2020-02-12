@@ -38,7 +38,7 @@ public class DailyRewardsMenuScreen extends AbstractGUIScreen {
             alignment = EnumGUIAlignment.CENTER;
             break;
         }
-        return new GUIWorkspace(this, 12 + 48 * 5 + 3, 160).setAlignment(alignment, 0, 0);
+        return new GUIWorkspace(this, 12 + 48 * 5 + 3, 128).setAlignment(alignment, 0, 0);
     }
 
     @Override

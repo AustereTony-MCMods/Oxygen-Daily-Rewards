@@ -1,12 +1,11 @@
 package austeretony.oxygen_dailyrewards.common.reward;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 
 import austeretony.oxygen_core.common.api.CommonReference;
 import austeretony.oxygen_core.common.util.ByteBufUtils;
 import austeretony.oxygen_core.server.api.CurrencyHelperServer;
+import austeretony.oxygen_dailyrewards.common.main.DailyRewardsMain;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -45,17 +44,6 @@ public class RewardCurrency implements Reward {
         return this.special;
     }
 
-    @Override
-    public JsonElement toJson() {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.add("day", new JsonPrimitive(this.day));
-        jsonObject.add("description", new JsonPrimitive(this.description));
-        jsonObject.add("amount", new JsonPrimitive(this.amount));
-        jsonObject.add("special", new JsonPrimitive(this.special));
-        jsonObject.add("currency_index", new JsonPrimitive(this.currencyIndex));
-        return jsonObject;
-    }
-
     public static Reward fromJson(JsonObject jsonObject) {
         RewardCurrency reward = new RewardCurrency();
         reward.day = jsonObject.get("day").getAsInt();
@@ -88,6 +76,11 @@ public class RewardCurrency implements Reward {
     @Override
     public void rewardPlayer(EntityPlayerMP playerMP) {
         CurrencyHelperServer.addCurrency(CommonReference.getPersistentUUID(playerMP), this.amount, this.currencyIndex);
+        DailyRewardsMain.DAILY_REWARDS_LOGGER.info("<{}/{}> [2]: player rewarded with CURRENCY - index <{}>, amount {}.", 
+                CommonReference.getName(playerMP), 
+                CommonReference.getPersistentUUID(playerMP),
+                this.currencyIndex,
+                this.amount);
     }
 
     public int getCurrencyIndex() {

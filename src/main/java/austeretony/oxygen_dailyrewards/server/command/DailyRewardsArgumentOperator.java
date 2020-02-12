@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import austeretony.oxygen_core.common.api.OxygenHelperCommon;
 import austeretony.oxygen_core.common.command.ArgumentExecutor;
 import austeretony.oxygen_core.common.item.ItemStackWrapper;
+import austeretony.oxygen_core.common.main.OxygenMain;
 import austeretony.oxygen_core.common.util.JsonUtils;
 import austeretony.oxygen_core.server.api.OxygenHelperServer;
 import austeretony.oxygen_dailyrewards.common.main.DailyRewardsMain;
@@ -53,7 +54,7 @@ public class DailyRewardsArgumentOperator implements ArgumentExecutor {
                                 Files.createDirectories(path.getParent());   
                             JsonUtils.createExternalJsonFile(folder, stackObject);
                         } catch (IOException exception) {
-                            DailyRewardsMain.LOGGER.error("ItemStack writing failure!", exception);
+                            OxygenMain.LOGGER.error("[Daily Rewards] ItemStack writing failure!", exception);
                         }
                         OxygenHelperServer.sendStatusMessage(senderPlayerMP, DailyRewardsMain.DAILY_REWARDS_MOD_INDEX, EnumDailyRewardsStatusMessage.ITEMSTACK_SERIALIZED.ordinal());
                     } else

@@ -28,7 +28,7 @@ public class RewardsSection extends AbstractGUISection {
     private static final int 
     WIDGETS_PER_LIST = 7,
     WIDGET_WIDTH = 48, 
-    WIDGET_HEIGHT = 64;
+    WIDGET_HEIGHT = 48;
 
     private OxygenTextLabel nextRewardTimeLabel;
 

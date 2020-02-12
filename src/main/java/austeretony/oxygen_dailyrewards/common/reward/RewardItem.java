@@ -1,13 +1,12 @@
 package austeretony.oxygen_dailyrewards.common.reward;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 
 import austeretony.oxygen_core.common.api.CommonReference;
 import austeretony.oxygen_core.common.inventory.InventoryHelper;
 import austeretony.oxygen_core.common.item.ItemStackWrapper;
 import austeretony.oxygen_core.common.util.ByteBufUtils;
+import austeretony.oxygen_dailyrewards.common.main.DailyRewardsMain;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -48,17 +47,6 @@ public class RewardItem implements Reward {
         return this.special;
     }
 
-    @Override
-    public JsonElement toJson() {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.add("day", new JsonPrimitive(this.day));
-        jsonObject.add("description", new JsonPrimitive(this.description));
-        jsonObject.add("amount", new JsonPrimitive(this.amount));
-        jsonObject.add("special", new JsonPrimitive(this.special));
-        jsonObject.add("itemstack", this.stackWrapper.toJson());
-        return jsonObject;
-    }
-
     public static Reward fromJson(JsonObject jsonObject) {
         RewardItem reward = new RewardItem();
         reward.day = jsonObject.get("day").getAsInt();
@@ -92,6 +80,11 @@ public class RewardItem implements Reward {
     public void rewardPlayer(EntityPlayerMP playerMP) { 
         CommonReference.delegateToServerThread(
                 ()->InventoryHelper.addItemStack(playerMP, this.stackWrapper.getCachedItemStack(), (int) this.amount));
+        DailyRewardsMain.DAILY_REWARDS_LOGGER.info("<{}/{}> [2]: player rewarded with ITEM - name <{}>, amount {}.", 
+                CommonReference.getName(playerMP), 
+                CommonReference.getPersistentUUID(playerMP),
+                this.stackWrapper.getCachedItemStack().getDisplayName(),
+                this.amount);
     }
 
     public ItemStackWrapper getStackWrapper() {
