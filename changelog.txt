@@ -1,3 +1,8 @@
+0.10.4b [2020-02-12]
++ Added support for rewards in the form of console commands
++ Fixed potential errors when calculating rewards at the beginning of a new month
++ Redesigned awards widgets
+
 0.10.3b [2020-02-01]
 + Fixed a visual bug in the rewards menu, which led to incorrect display of received rewards on the first day of the month.
 + Added the ability to localize the names of the months.
