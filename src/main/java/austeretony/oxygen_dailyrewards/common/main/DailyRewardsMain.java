@@ -1,21 +1,5 @@
 package austeretony.oxygen_dailyrewards.common.main;
 
-import java.util.zip.Deflater;
-
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.appender.RollingFileAppender;
-import org.apache.logging.log4j.core.appender.rolling.CompositeTriggeringPolicy;
-import org.apache.logging.log4j.core.appender.rolling.DefaultRolloverStrategy;
-import org.apache.logging.log4j.core.appender.rolling.SizeBasedTriggeringPolicy;
-import org.apache.logging.log4j.core.appender.rolling.TimeBasedTriggeringPolicy;
-import org.apache.logging.log4j.core.config.AppenderRef;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.LoggerConfig;
-import org.apache.logging.log4j.core.layout.PatternLayout;
-
 import austeretony.oxygen_core.client.api.OxygenGUIHelper;
 import austeretony.oxygen_core.client.api.OxygenHelperClient;
 import austeretony.oxygen_core.client.command.CommandOxygenClient;
@@ -23,6 +7,9 @@ import austeretony.oxygen_core.client.gui.settings.SettingsScreen;
 import austeretony.oxygen_core.common.api.CommonReference;
 import austeretony.oxygen_core.common.api.OxygenHelperCommon;
 import austeretony.oxygen_core.common.main.OxygenMain;
+import austeretony.oxygen_core.common.privilege.PrivilegeUtils;
+import austeretony.oxygen_core.server.OxygenManagerServer;
+import austeretony.oxygen_core.server.api.PrivilegesProviderServer;
 import austeretony.oxygen_core.server.command.CommandOxygenOperator;
 import austeretony.oxygen_core.server.command.CommandOxygenServer;
 import austeretony.oxygen_core.server.network.NetworkRequestsRegistryServer;
@@ -50,7 +37,7 @@ import net.minecraftforge.fml.relauncher.Side;
         modid = DailyRewardsMain.MODID, 
         name = DailyRewardsMain.NAME, 
         version = DailyRewardsMain.VERSION,
-        dependencies = "required-after:oxygen_core@[0.10.2,);",
+        dependencies = "required-after:oxygen_core@[0.11.0,);",
         certificateFingerprint = "@FINGERPRINT@",
         updateJSON = DailyRewardsMain.VERSIONS_FORGE_URL)
 public class DailyRewardsMain {
@@ -58,7 +45,7 @@ public class DailyRewardsMain {
     public static final String 
     MODID = "oxygen_dailyrewards",
     NAME = "Oxygen: Daily Rewards",
-    VERSION = "0.10.4",
+    VERSION = "0.11.0",
     VERSION_CUSTOM = VERSION + ":beta:0",
     GAME_VERSION = "1.12.2",
     VERSIONS_FORGE_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/Oxygen-Daily-Rewards/info/mod_versions_forge.json";
@@ -69,8 +56,6 @@ public class DailyRewardsMain {
     DAILY_REWARDS_MENU_SCREEN_ID = 140,
 
     CLAIM_REWARD_REQUEST_ID = 140;
-
-    public static final Logger DAILY_REWARDS_LOGGER = getLogger("daily rewards", "rewards", "Oxygen/Daily Rewards");
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -98,38 +83,18 @@ public class DailyRewardsMain {
         }
     }
 
+    public static void addDefaultPrivileges() {
+        if (PrivilegesProviderServer.getRole(OxygenMain.OPERATOR_ROLE_ID).getPrivilege(EnumDailyRewardsPrivilege.DAILY_REWARDS_ACCESS.id()) == null) {
+            PrivilegesProviderServer.getRole(OxygenMain.OPERATOR_ROLE_ID).addPrivileges(
+                    PrivilegeUtils.getPrivilege(EnumDailyRewardsPrivilege.DAILY_REWARDS_ACCESS.id(), true),
+                    PrivilegeUtils.getPrivilege(EnumDailyRewardsPrivilege.MAXIMUM_REWARDS_AMOUNT_PER_MONTH.id(), 31));
+            OxygenManagerServer.instance().getPrivilegesContainer().markChanged();
+            OxygenMain.LOGGER.info("[Daily Rewards] Default Operator role privileges added.");
+        }
+    }
+
     private void initNetwork() {
         OxygenMain.network().registerPacket(CPSyncRewardsData.class);
         OxygenMain.network().registerPacket(CPSyncPlayerData.class);
-    }
-
-    //TODO 0.11 Move to Core into package "common.utils"
-    public static final Logger getLogger(String cat, String file, String name){
-        LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
-        final Configuration configuration = loggerContext.getConfiguration();
-        PatternLayout layout = PatternLayout.newBuilder().withPattern("[%d{dd-MMM-yyyy HH:mm:ss}] [%t] [%c]: %m%n").withConfiguration(configuration).build();
-        RollingFileAppender appender = RollingFileAppender.newBuilder()
-                .setConfiguration(configuration)
-                .withFileName("./logs/oxygen/" + cat + "/" + file + ".log")
-                .withFilePattern("./logs/oxygen/" + cat + "/" + file + "-%d{yyyy-MM-dd}.%i.log.gz")
-                .withName(name)
-                .withAppend(true)
-                .withImmediateFlush(true)
-                .withBufferedIo(true)
-                .withBufferSize(8192)
-                .withCreateOnDemand(false)
-                .withLocking(false)
-                .withLayout(layout)
-                .withPolicy(CompositeTriggeringPolicy.createPolicy(SizeBasedTriggeringPolicy.createPolicy("10 M"), TimeBasedTriggeringPolicy.createPolicy("1", null)))
-                .withStrategy(DefaultRolloverStrategy.createStrategy(String.valueOf(Integer.MAX_VALUE), String.valueOf(1), "max", String.valueOf(Deflater.NO_COMPRESSION), null, true, configuration)).build();
-        appender.start();
-        configuration.addAppender(appender);
-        AppenderRef ref = AppenderRef.createAppenderRef(name, null, null);
-        LoggerConfig loggerConfig = LoggerConfig.createLogger(true, Level.INFO, name, "true", new AppenderRef[] {ref}, null, configuration, null);
-        configuration.addLogger(name, loggerConfig);
-        loggerContext.getLogger(name).addAppender(appender);
-        loggerContext.updateLoggers();
-
-        return loggerContext.getLogger(name);
     }
 }

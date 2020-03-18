@@ -7,11 +7,13 @@ import austeretony.oxygen_core.client.api.ClientReference;
 import austeretony.oxygen_core.client.api.EnumBaseGUISetting;
 import austeretony.oxygen_core.client.api.OxygenHelperClient;
 import austeretony.oxygen_core.client.currency.CurrencyProperties;
+import austeretony.oxygen_core.client.gui.OxygenGUITextures;
 import austeretony.oxygen_core.client.gui.OxygenGUIUtils;
 import austeretony.oxygen_dailyrewards.common.reward.Reward;
 import austeretony.oxygen_dailyrewards.common.reward.RewardCommand;
 import austeretony.oxygen_dailyrewards.common.reward.RewardCurrency;
 import austeretony.oxygen_dailyrewards.common.reward.RewardItem;
+import austeretony.oxygen_dailyrewards.common.reward.RewardScript;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
@@ -57,6 +59,10 @@ public class DailyRewardWidgetBig extends GUISimpleElement<DailyRewardWidgetBig>
         case COMMAND:
             this.iconTexture = ((RewardCommand) reward).getIconTexture();
             this.initTooltip(((RewardCommand) reward).getTooltip(), EnumBaseGUISetting.TOOLTIP_TEXT_COLOR.get().asInt(), EnumBaseGUISetting.TOOLTIP_BACKGROUND_COLOR.get().asInt(), EnumBaseGUISetting.TEXT_TOOLTIP_SCALE.get().asFloat());
+            break;
+        case SCRIPT:
+            this.iconTexture = ((RewardScript) reward).getIconTexture();
+            this.initTooltip(((RewardScript) reward).getTooltip(), EnumBaseGUISetting.TOOLTIP_TEXT_COLOR.get().asInt(), EnumBaseGUISetting.TOOLTIP_BACKGROUND_COLOR.get().asInt(), EnumBaseGUISetting.TEXT_TOOLTIP_SCALE.get().asFloat());
             break;
         }
 
@@ -149,15 +155,15 @@ public class DailyRewardWidgetBig extends GUISimpleElement<DailyRewardWidgetBig>
 
             if (this.special) {
                 GlStateManager.enableBlend(); 
-                this.mc.getTextureManager().bindTexture(DailyRewardsMenuScreen.SPECIAL_ICON);                        
-                GUIAdvancedElement.drawCustomSizedTexturedRect(this.getWidth() - 10, 2, 0, 0, 8, 8, 8, 8);     
+                this.mc.getTextureManager().bindTexture(OxygenGUITextures.STAR_ICONS);                        
+                GUIAdvancedElement.drawCustomSizedTexturedRect(this.getWidth() - 10, 2, 0, 0, 8, 8, 24, 8);     
                 GlStateManager.disableBlend(); 
             }
 
             if (this.locked && !this.unreachable && !this.rewarded) {
                 GlStateManager.enableBlend(); 
-                this.mc.getTextureManager().bindTexture(DailyRewardsMenuScreen.LOCKED_ICON);                        
-                GUIAdvancedElement.drawCustomSizedTexturedRect(this.getWidth() - 10, this.getHeight() - 10, 0, 0, 8, 8, 8, 8);     
+                this.mc.getTextureManager().bindTexture(OxygenGUITextures.LOCK_ICONS);                        
+                GUIAdvancedElement.drawCustomSizedTexturedRect(this.getWidth() - 10, this.getHeight() - 10, 0, 0, 8, 8, 24, 8);     
                 GlStateManager.disableBlend(); 
             }
 

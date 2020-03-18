@@ -3,10 +3,13 @@ package austeretony.oxygen_dailyrewards.common.reward;
 import com.google.gson.JsonObject;
 
 import austeretony.oxygen_core.common.api.CommonReference;
-import austeretony.oxygen_core.common.inventory.InventoryHelper;
 import austeretony.oxygen_core.common.item.ItemStackWrapper;
+import austeretony.oxygen_core.common.main.OxygenMain;
+import austeretony.oxygen_core.common.sound.OxygenSoundEffects;
 import austeretony.oxygen_core.common.util.ByteBufUtils;
-import austeretony.oxygen_dailyrewards.common.main.DailyRewardsMain;
+import austeretony.oxygen_core.server.api.InventoryProviderServer;
+import austeretony.oxygen_core.server.api.SoundEventHelperServer;
+import austeretony.oxygen_dailyrewards.common.config.DailyRewardsConfig;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -78,13 +81,15 @@ public class RewardItem implements Reward {
 
     @Override
     public void rewardPlayer(EntityPlayerMP playerMP) { 
-        CommonReference.delegateToServerThread(
-                ()->InventoryHelper.addItemStack(playerMP, this.stackWrapper.getCachedItemStack(), (int) this.amount));
-        DailyRewardsMain.DAILY_REWARDS_LOGGER.info("<{}/{}> [2]: player rewarded with ITEM - name <{}>, amount {}.", 
-                CommonReference.getName(playerMP), 
-                CommonReference.getPersistentUUID(playerMP),
-                this.stackWrapper.getCachedItemStack().getDisplayName(),
-                this.amount);
+        InventoryProviderServer.getPlayerInventory().addItem(playerMP, this.stackWrapper, (int) this.amount);
+        SoundEventHelperServer.playSoundClient(playerMP, OxygenSoundEffects.INVENTORY_OPERATION.getId());
+
+        if (DailyRewardsConfig.ADVANCED_LOGGING.asBoolean())
+            OxygenMain.LOGGER.info("[Daily Rewards] <{}/{}> [2]: player rewarded with ITEM - name <{}>, amount {}.", 
+                    CommonReference.getName(playerMP), 
+                    CommonReference.getPersistentUUID(playerMP),
+                    this.stackWrapper.getCachedItemStack().getDisplayName(),
+                    this.amount);
     }
 
     public ItemStackWrapper getStackWrapper() {

@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import javax.annotation.Nullable;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -78,7 +80,7 @@ public class RewardsDataContainerServer {
         JsonArray rewardsArray;
         JsonObject 
         rewardObject, 
-        defaultReward = ItemStackWrapper.getFromStack(new ItemStack(Items.EMERALD)).toJson().getAsJsonObject();
+        defaultReward = ItemStackWrapper.of(new ItemStack(Items.EMERALD)).toJson().getAsJsonObject();
         int i;
 
         for (Month month : Month.values()) {
@@ -123,15 +125,20 @@ public class RewardsDataContainerServer {
         return this.rewards;
     }
 
+    @Nullable
     public Reward getDailyReward(int day) {
-        return this.rewards.get(day - 1);
+        if (this.rewards.size() >= day)
+            return this.rewards.get(day - 1);
+        return null;
     }
 
-    public void syncRewardsData(EntityPlayerMP playerMP) {
-        synchronized (this.compressedRewards) {
-            byte[] compressed = new byte[this.compressedRewards.writerIndex()];
-            this.compressedRewards.getBytes(0, compressed);
-            OxygenMain.network().sendTo(new CPSyncRewardsData(compressed), playerMP);
+    public void syncRewardsData(@Nullable EntityPlayerMP playerMP) {
+        if (playerMP != null) {
+            synchronized (this.compressedRewards) {
+                byte[] compressed = new byte[this.compressedRewards.writerIndex()];
+                this.compressedRewards.getBytes(0, compressed);
+                OxygenMain.network().sendTo(new CPSyncRewardsData(compressed), playerMP);
+            }
         }
     }
 }

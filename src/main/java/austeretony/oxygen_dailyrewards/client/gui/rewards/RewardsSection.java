@@ -15,13 +15,15 @@ import austeretony.oxygen_core.client.api.ClientReference;
 import austeretony.oxygen_core.client.api.EnumBaseGUISetting;
 import austeretony.oxygen_core.client.api.PrivilegesProviderClient;
 import austeretony.oxygen_core.client.api.TimeHelperClient;
-import austeretony.oxygen_core.client.gui.elements.OxygenButton;
+import austeretony.oxygen_core.client.gui.elements.OxygenDefaultBackgroundWithButtonsFiller;
+import austeretony.oxygen_core.client.gui.elements.OxygenKeyButton;
 import austeretony.oxygen_core.client.gui.elements.OxygenTextLabel;
 import austeretony.oxygen_dailyrewards.client.DailyRewardsManagerClient;
 import austeretony.oxygen_dailyrewards.common.config.DailyRewardsConfig;
 import austeretony.oxygen_dailyrewards.common.main.EnumDailyRewardsPrivilege;
 import austeretony.oxygen_dailyrewards.common.reward.Reward;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ScaledResolution;
 
 public class RewardsSection extends AbstractGUISection {
 
@@ -32,7 +34,7 @@ public class RewardsSection extends AbstractGUISection {
 
     private OxygenTextLabel nextRewardTimeLabel;
 
-    private OxygenButton prevButton, nextButton, claimButton;
+    private OxygenKeyButton prevWeekButton, nextWeekButton, claimRewardButton;
 
     private GUIElementsFramework framework;
 
@@ -40,7 +42,7 @@ public class RewardsSection extends AbstractGUISection {
 
     private int currentDayOfMonth, daysRewarded, monthLength, listedWeek;
 
-    private boolean rewardClaimed;
+    private boolean initialized, rewardClaimed;
 
     public RewardsSection(DailyRewardsMenuScreen screen) {
         super(screen);
@@ -56,17 +58,15 @@ public class RewardsSection extends AbstractGUISection {
         if (month == Month.FEBRUARY && currentTime.toLocalDate().isLeapYear())
             this.monthLength = 29;
 
-        this.addElement(new RewardsBackgroundFiller(0, 0, this.getWidth(), this.getHeight()));
+        this.addElement(new OxygenDefaultBackgroundWithButtonsFiller(0, 0, this.getWidth(), this.getHeight()));
         String monthName = ClientReference.localize("oxygen_core.month." + month.getDisplayName(TextStyle.FULL, Locale.ROOT).toLowerCase());
         this.addElement(new OxygenTextLabel(4, 12, ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.title", monthName), EnumBaseGUISetting.TEXT_TITLE_SCALE.get().asFloat(), EnumBaseGUISetting.TEXT_ENABLED_COLOR.get().asInt()));
 
-        this.addElement(this.claimButton = new OxygenButton(6, this.getHeight() - 11, 40, 10, ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.claimButton")).disable());     
-        this.claimButton.setKeyPressListener(Keyboard.KEY_E, ()->this.claimReward());
+        this.addElement(this.claimRewardButton = new OxygenKeyButton(0, this.getY() + this.getHeight() + this.screen.guiTop - 8, ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.button.claimReward"), Keyboard.KEY_E, this::claimReward).disable());     
+        this.addElement(this.nextRewardTimeLabel = new OxygenTextLabel(this.getWidth(), this.getY() + this.getHeight() + this.screen.guiTop - 1, "", EnumBaseGUISetting.TEXT_SUB_SCALE.get().asFloat(), EnumBaseGUISetting.TEXT_ENABLED_COLOR.get().asInt()));
 
-        this.addElement(this.nextRewardTimeLabel = new OxygenTextLabel(50, this.getHeight() - 3, "", EnumBaseGUISetting.TEXT_SUB_SCALE.get().asFloat(), EnumBaseGUISetting.TEXT_ENABLED_COLOR.get().asInt()));
-
-        this.addElement(this.prevButton = new OxygenButton(this.getWidth() - 90, this.getHeight() - 11, 40, 10, ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.prevButton")).disable());     
-        this.addElement(this.nextButton = new OxygenButton(this.getWidth() - 46, this.getHeight() - 11, 40, 10, ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.nextButton")).disable());     
+        this.addElement(this.prevWeekButton = new OxygenKeyButton(0, this.getY() + this.getHeight() + this.screen.guiTop - 8, ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.button.prevWeek"), Keyboard.KEY_A, this::switchWeekBack).disable());     
+        this.addElement(this.nextWeekButton = new OxygenKeyButton(0, this.getY() + this.getHeight() + this.screen.guiTop - 8, ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.button.nextWeek"), Keyboard.KEY_D, this::switchWeekForward).disable());     
 
         this.addElement(this.framework = new GUIElementsFramework(this.screen, 6, 16, WIDGET_WIDTH * 3 + 3 + WIDGET_WIDTH * 2, WIDGET_HEIGHT * 2 + 1));
 
@@ -79,12 +79,20 @@ public class RewardsSection extends AbstractGUISection {
         this.updateButtonsState();
     }
 
+    private void calculateButtonsHorizontalPosition() {
+        ScaledResolution sr = new ScaledResolution(this.mc);
+        this.claimRewardButton.setX((sr.getScaledWidth() - (12 + this.textWidth(this.claimRewardButton.getDisplayText(), this.claimRewardButton.getTextScale()))) / 2 - this.screen.guiLeft);
+
+        this.prevWeekButton.setX(sr.getScaledWidth() / 2 - 50 - (12 + this.textWidth(this.prevWeekButton.getDisplayText(), this.prevWeekButton.getTextScale())) - this.screen.guiLeft);
+        this.nextWeekButton.setX(sr.getScaledWidth() / 2 + 50 - this.screen.guiLeft);
+    }
+
     private void listRewards(int fromDay) {
         this.framework.getElements().clear();
         Reward reward;
         int 
         index = 0,
-        maximumRewards = PrivilegesProviderClient.getAsInt(EnumDailyRewardsPrivilege.MAXIMUM_REWARDS_AMOUNT.id(), DailyRewardsConfig.MAXIMUM_REWARDS_AMOUNT.asInt());
+        maximumRewards = PrivilegesProviderClient.getAsInt(EnumDailyRewardsPrivilege.MAXIMUM_REWARDS_AMOUNT_PER_MONTH.id(), DailyRewardsConfig.MAXIMUM_REWARDS_AMOUNT_PER_MONTH.asInt());
         boolean rewarded, nextReward, locked, unreachable;
         for (int i = fromDay; i < fromDay + WIDGETS_PER_LIST; i++) {
             if (i > this.monthLength) break;
@@ -103,28 +111,35 @@ public class RewardsSection extends AbstractGUISection {
     }
 
     private void updateButtonsState() {
-        this.claimButton.setEnabled(!this.rewardClaimed);
+        this.claimRewardButton.setEnabled(!this.rewardClaimed);
 
-        this.prevButton.setEnabled(this.listedWeek != 0);
-        this.nextButton.setEnabled(this.listedWeek < 4);
+        this.prevWeekButton.setEnabled(this.listedWeek != 0);
+        this.nextWeekButton.setEnabled(this.listedWeek < 4);
     }
 
     private void claimReward() {
         Minecraft.getMinecraft().player.sendChatMessage("/oxygens dailyrewards -claim");
     }
 
+    private void switchWeekBack() {
+        this.listRewards(WIDGETS_PER_LIST * --this.listedWeek + 1);
+        this.updateButtonsState();
+    }
+
+    private void switchWeekForward() {
+        this.listRewards(WIDGETS_PER_LIST * ++this.listedWeek + 1);
+        this.updateButtonsState();
+    }
+
     @Override
     public void handleElementClick(AbstractGUISection section, GUIBaseElement element, int mouseButton) {
         if (mouseButton == 0) {
-            if (element == this.claimButton)
+            if (element == this.claimRewardButton)
                 this.claimReward();
-            else if (element == this.prevButton) {
-                this.listRewards(WIDGETS_PER_LIST * --this.listedWeek + 1);
-                this.updateButtonsState();
-            } else if (element == this.nextButton) {
-                this.listRewards(WIDGETS_PER_LIST * ++this.listedWeek + 1);
-                this.updateButtonsState();
-            }
+            else if (element == this.prevWeekButton)
+                this.switchWeekBack();
+            else if (element == this.nextWeekButton)
+                this.switchWeekForward();
         }
     }
 
@@ -139,9 +154,18 @@ public class RewardsSection extends AbstractGUISection {
                 this.updateButtonsState();
                 return;
             }
+
             this.nextRewardTimeLabel.setDisplayText(String.format("%d:%02d:%02d %s", duration.getSeconds() / 3600, (duration.getSeconds() % 3600) / 60, (duration.getSeconds() % 60), 
                     this.currentDayOfMonth == this.monthLength ? ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.nextMonthBegins") : ""));
+
+            ScaledResolution sr = new ScaledResolution(this.mc);
+            this.nextRewardTimeLabel.setX(sr.getScaledWidth() - this.screen.guiLeft - 4 - this.textWidth(this.nextRewardTimeLabel.getDisplayText(), this.nextRewardTimeLabel.getTextScale()));
         }  
+
+        if (!this.initialized) {
+            this.initialized = true;
+            this.calculateButtonsHorizontalPosition();
+        }
     }
 
     public void rewardClaimed() {

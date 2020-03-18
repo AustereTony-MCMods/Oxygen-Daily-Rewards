@@ -6,7 +6,7 @@ import io.netty.buffer.ByteBuf;
 
 public enum EnumReward {
 
-    ITEM() {
+    ITEM {
 
         @Override
         public Reward fromJson(JsonObject jsonObject) {
@@ -18,7 +18,7 @@ public enum EnumReward {
             return RewardItem.read(buffer);
         }
     },
-    CURRENCY() {
+    CURRENCY {
 
         @Override
         public Reward fromJson(JsonObject jsonObject) {
@@ -30,7 +30,7 @@ public enum EnumReward {
             return RewardCurrency.read(buffer);
         }
     },
-    COMMAND() {
+    COMMAND {
 
         @Override
         public Reward fromJson(JsonObject jsonObject) {
@@ -40,6 +40,18 @@ public enum EnumReward {
         @Override
         public Reward read(ByteBuf buffer) {
             return RewardCommand.read(buffer);
+        }
+    },
+    SCRIPT {
+
+        @Override
+        public Reward fromJson(JsonObject jsonObject) {
+            return RewardScript.fromJson(jsonObject);
+        }
+
+        @Override
+        public Reward read(ByteBuf buffer) {
+            return RewardScript.read(buffer);
         }
     };
 

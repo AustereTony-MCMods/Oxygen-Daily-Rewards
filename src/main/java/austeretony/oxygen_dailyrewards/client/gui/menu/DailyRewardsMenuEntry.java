@@ -1,17 +1,19 @@
 package austeretony.oxygen_dailyrewards.client.gui.menu;
 
-import org.lwjgl.input.Keyboard;
-
 import austeretony.oxygen_core.client.api.ClientReference;
+import austeretony.oxygen_core.client.api.PrivilegesProviderClient;
 import austeretony.oxygen_core.client.gui.menu.OxygenMenuEntry;
-import austeretony.oxygen_dailyrewards.client.DailyRewardsManagerClient;
+import austeretony.oxygen_dailyrewards.client.RewardsMenuManager;
 import austeretony.oxygen_dailyrewards.client.settings.EnumDailyRewardsClientSettings;
+import austeretony.oxygen_dailyrewards.common.config.DailyRewardsConfig;
+import austeretony.oxygen_dailyrewards.common.main.DailyRewardsMain;
+import austeretony.oxygen_dailyrewards.common.main.EnumDailyRewardsPrivilege;
 
 public class DailyRewardsMenuEntry implements OxygenMenuEntry {
 
     @Override
     public int getId() {
-        return 140;
+        return DailyRewardsMain.DAILY_REWARDS_MENU_SCREEN_ID;
     }
 
     @Override
@@ -21,16 +23,17 @@ public class DailyRewardsMenuEntry implements OxygenMenuEntry {
 
     @Override
     public int getKeyCode() {
-        return Keyboard.KEY_COMMA;
+        return DailyRewardsConfig.DAILY_REWARDS_MENU_KEY.asInt();
     }
 
     @Override
     public boolean isValid() {
-        return EnumDailyRewardsClientSettings.ADD_DAILY_REWARDS_MENU.get().asBoolean();
+        return PrivilegesProviderClient.getAsBoolean(EnumDailyRewardsPrivilege.DAILY_REWARDS_ACCESS.id(), DailyRewardsConfig.DAILY_REWARDS_ACCESS.asBoolean()) 
+                && EnumDailyRewardsClientSettings.ADD_DAILY_REWARDS_MENU.get().asBoolean();
     }
 
     @Override
     public void open() {
-        DailyRewardsManagerClient.instance().getMenuManager().openDailyRewardsMenu();
+        RewardsMenuManager.openDailyRewardsMenu();
     }
 }

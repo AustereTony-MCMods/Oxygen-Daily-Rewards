@@ -21,12 +21,10 @@ oxygen_dailyrewards.description.currency=Moeda
 oxygen_dailyrewards.status.dailyRewardAvailable=Você tem uma recompensa diária disponível
 oxygen_dailyrewards.status.dailyRewardClaimed=Recompensa diária reivindicada
 oxygen_dailyrewards.status.dailyRewardUnavailable=Recompensa diária indisponível
-
 oxygen_dailyrewards.status.dailyRewardReloaded=Recompensas Diárias recarregadas
-oxygen_dailyrewards.status.itemStackSerialized=Item serializado
 
-oxygen_dailyrewards.message.dailyRewardAvailable=Você tem uma recompensa diária disponível: 
-oxygen_dailyrewards.message.clickHere=clique aqui
+oxygen_dailyrewards.status.message.dailyRewardAvailable=Você tem uma recompensa diária disponível: 
+oxygen_dailyrewards.status.message.clickHere=clique aqui
 
 oxygen_core.month.january=Janeiro
 oxygen_core.month.february=Fevereiro

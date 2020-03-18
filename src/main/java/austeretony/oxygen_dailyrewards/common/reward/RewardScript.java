@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 
 import com.google.gson.JsonObject;
@@ -13,6 +14,9 @@ import com.google.gson.JsonObject;
 import austeretony.oxygen_core.client.api.ClientReference;
 import austeretony.oxygen_core.common.api.CommonReference;
 import austeretony.oxygen_core.common.main.OxygenMain;
+import austeretony.oxygen_core.common.scripting.ScriptWrapper;
+import austeretony.oxygen_core.common.scripting.ScriptingProvider;
+import austeretony.oxygen_core.common.scripting.Shell;
 import austeretony.oxygen_core.common.util.ByteBufUtils;
 import austeretony.oxygen_dailyrewards.common.config.DailyRewardsConfig;
 import io.netty.buffer.ByteBuf;
@@ -20,13 +24,16 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
 
-public class RewardCommand implements Reward {
+public class RewardScript implements Reward {
 
-    private String description, tooltip, commands;
+    private String description, tooltip;
 
     private int day, amount;
 
     private boolean special;
+
+    @Nullable
+    private ScriptWrapper scriptWrapper;
 
     //server
     private byte[] iconRaw;
@@ -36,7 +43,7 @@ public class RewardCommand implements Reward {
 
     @Override
     public EnumReward getType() {
-        return EnumReward.COMMAND;
+        return EnumReward.SCRIPT;
     }
 
     @Override
@@ -60,15 +67,15 @@ public class RewardCommand implements Reward {
     }
 
     public static Reward fromJson(JsonObject jsonObject) {
-        RewardCommand reward = new RewardCommand();
+        RewardScript reward = new RewardScript();
         reward.day = jsonObject.get("day").getAsInt();
         reward.description = jsonObject.get("description").getAsString();
         reward.special = jsonObject.get("special").getAsBoolean();
         reward.amount = jsonObject.has("amount") ? jsonObject.get("amount").getAsInt() : 0;
         reward.tooltip = jsonObject.get("tooltip").getAsString();
-        reward.commands = jsonObject.get("commands").getAsString();
 
         reward.loadIconBytes(jsonObject.get("icon").getAsString());
+        reward.loadScript(jsonObject.get("script").getAsString());
 
         return reward;
     }
@@ -89,6 +96,15 @@ public class RewardCommand implements Reward {
         }
     }
 
+    private void loadScript(String scriptName) {
+        try {
+            this.scriptWrapper = ScriptWrapper.fromFile(CommonReference.getGameFolder() + "/config/oxygen/data/server/daily rewards/scripts/" + scriptName, scriptName);
+        } catch (IOException exception) {
+            OxygenMain.LOGGER.info("[Daily Rewards] Failed to load reward script: {}", scriptName);
+            exception.printStackTrace();
+        }
+    }
+
     @Override
     public void write(ByteBuf buffer) {  
         buffer.writeByte(this.day);
@@ -102,7 +118,7 @@ public class RewardCommand implements Reward {
     }
 
     public static Reward read(ByteBuf buffer) {
-        RewardCommand reward = new RewardCommand();
+        RewardScript reward = new RewardScript();
         reward.day = buffer.readByte();
         reward.description = ByteBufUtils.readString(buffer);
         reward.special = buffer.readBoolean();
@@ -116,28 +132,20 @@ public class RewardCommand implements Reward {
 
     @Override
     public void rewardPlayer(EntityPlayerMP playerMP) {
-        String[] commands = this.commands.split("[;]");
-        for (String command : commands) {
-            if (command.contains("@p"))
-                command = command.replace("@p", CommonReference.getName(playerMP));
+        if (this.scriptWrapper != null) {
+            Shell shell = ScriptingProvider.createShell();
 
-            if (command.contains("@pX"))
-                command = command.replace("@pX", String.valueOf((int) playerMP.posX));
-            if (command.contains("@pY"))
-                command = command.replace("@pY", String.valueOf((int) playerMP.posY));
-            if (command.contains("@pZ"))
-                command = command.replace("@pZ", String.valueOf((int) playerMP.posZ));
-            if (command.contains("@dim"))
-                command = command.replace("@dim", String.valueOf(playerMP.dimension));
+            shell.put("world", playerMP.world);
+            shell.put("player", playerMP);
 
-            CommonReference.getServer().commandManager.executeCommand(CommonReference.getServer(), command);
+            shell.evaluate(this.scriptWrapper.getScriptText(), this.scriptWrapper.getName(), DailyRewardsConfig.DEBUG_SCRIPTS.asBoolean());
+
+            if (DailyRewardsConfig.ADVANCED_LOGGING.asBoolean())
+                OxygenMain.LOGGER.info("[Daily Rewards] <{}/{}> [2]: player rewarded with SCRIPT - {}.", 
+                        CommonReference.getName(playerMP), 
+                        CommonReference.getPersistentUUID(playerMP),
+                        this.scriptWrapper.getName());
         }
-
-        if (DailyRewardsConfig.ADVANCED_LOGGING.asBoolean())
-            OxygenMain.LOGGER.info("[Daily Rewards] <{}/{}> [2]: player rewarded with COMMAND - {}.", 
-                    CommonReference.getName(playerMP), 
-                    CommonReference.getPersistentUUID(playerMP),
-                    this.commands);
     }
 
     public String getTooltip() {

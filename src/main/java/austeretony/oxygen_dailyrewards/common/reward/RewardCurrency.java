@@ -3,9 +3,12 @@ package austeretony.oxygen_dailyrewards.common.reward;
 import com.google.gson.JsonObject;
 
 import austeretony.oxygen_core.common.api.CommonReference;
+import austeretony.oxygen_core.common.main.OxygenMain;
+import austeretony.oxygen_core.common.sound.OxygenSoundEffects;
 import austeretony.oxygen_core.common.util.ByteBufUtils;
 import austeretony.oxygen_core.server.api.CurrencyHelperServer;
-import austeretony.oxygen_dailyrewards.common.main.DailyRewardsMain;
+import austeretony.oxygen_core.server.api.SoundEventHelperServer;
+import austeretony.oxygen_dailyrewards.common.config.DailyRewardsConfig;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -76,11 +79,14 @@ public class RewardCurrency implements Reward {
     @Override
     public void rewardPlayer(EntityPlayerMP playerMP) {
         CurrencyHelperServer.addCurrency(CommonReference.getPersistentUUID(playerMP), this.amount, this.currencyIndex);
-        DailyRewardsMain.DAILY_REWARDS_LOGGER.info("<{}/{}> [2]: player rewarded with CURRENCY - index <{}>, amount {}.", 
-                CommonReference.getName(playerMP), 
-                CommonReference.getPersistentUUID(playerMP),
-                this.currencyIndex,
-                this.amount);
+        SoundEventHelperServer.playSoundClient(playerMP, OxygenSoundEffects.RINGING_COINS.getId());
+
+        if (DailyRewardsConfig.ADVANCED_LOGGING.asBoolean())
+            OxygenMain.LOGGER.info("[Daily Rewards] <{}/{}> [2]: player rewarded with CURRENCY - index <{}>, amount {}.", 
+                    CommonReference.getName(playerMP), 
+                    CommonReference.getPersistentUUID(playerMP),
+                    this.currencyIndex,
+                    this.amount);
     }
 
     public int getCurrencyIndex() {

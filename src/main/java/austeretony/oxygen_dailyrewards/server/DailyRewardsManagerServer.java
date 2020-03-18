@@ -33,14 +33,14 @@ public class DailyRewardsManagerServer {
     }
 
     private void registerPersistentData() {
-        OxygenHelperServer.registerPersistentData(()->this.playerDataContainer.save());
+        OxygenHelperServer.registerPersistentData(this.playerDataContainer::save);
     }
 
     private void scheduleRepeatableProcesses() {
         //scheduling rewards reloading when new month starts
         ZonedDateTime 
         currentTime = TimeHelperServer.getZonedDateTime(),
-        reloadingTime = currentTime.withDayOfMonth(1).withHour(DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt()).withMinute(0).withSecond(0);
+        reloadingTime = currentTime.withDayOfMonth(1).withHour(DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt()).withMinute(0).withSecond(0).withNano(0);
 
         if (currentTime.compareTo(reloadingTime) > 0)
             reloadingTime = reloadingTime.plusMonths(1L);
@@ -50,12 +50,15 @@ public class DailyRewardsManagerServer {
 
         long initalDelay = Duration.between(currentTime, reloadingTime).getSeconds();
 
-        OxygenHelperServer.getSchedulerExecutorService().scheduleAtFixedRate(()->this.reloadRewards(), 
+        OxygenHelperServer.getSchedulerExecutorService().scheduleAtFixedRate(
+                this::reloadRewards, 
                 initalDelay, 
                 TimeUnit.DAYS.toSeconds(nextMonthLength), 
                 TimeUnit.SECONDS);
 
-        OxygenMain.LOGGER.info("[Daily Rewards] Scheduled rewards reloading for <{}> at: {}", nextMonth.getDisplayName(TextStyle.FULL, Locale.ENGLISH), reloadingTime.toString());
+        OxygenMain.LOGGER.info("[Daily Rewards] Scheduled rewards reloading for <{}> at: {}", 
+                nextMonth.getDisplayName(TextStyle.FULL, Locale.ENGLISH),
+                OxygenMain.DEBUG_DATE_TIME_FORMATTER.format(reloadingTime));
     }
 
     public static void create() {
@@ -83,7 +86,7 @@ public class DailyRewardsManagerServer {
     }
 
     public void worldLoaded() {
-        OxygenHelperServer.addIOTask(()->this.rewardsDataContainer.loadRewardsData());
+        OxygenHelperServer.addIOTask(this.rewardsDataContainer::loadRewardsData);
     }
 
     public void onPlayerLoaded(EntityPlayerMP playerMP) {
@@ -93,7 +96,7 @@ public class DailyRewardsManagerServer {
 
     public void reloadRewards() {
         Runnable reloadingTask = ()->{
-            Future future = OxygenHelperServer.getExecutionManager().addIOTask(()->this.rewardsDataContainer.loadRewardsData());
+            Future future = OxygenHelperServer.addIOTask(this.rewardsDataContainer::loadRewardsData);
             try {
                 future.get();
             } catch (ExecutionException | InterruptedException exception) {

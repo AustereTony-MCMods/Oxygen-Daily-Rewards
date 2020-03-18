@@ -11,8 +11,12 @@ public class RewardsMenuManager {
         this.manager = manager;
     }
 
-    public void openDailyRewardsMenu() {
+    public static void openDailyRewardsMenu() {
         ClientReference.displayGuiScreen(new DailyRewardsMenuScreen());
+    }
+
+    public static void openDailyRewardsMenuDelegated() {
+        ClientReference.delegateToClientThread(RewardsMenuManager::openDailyRewardsMenu);
     }
 
     public void rewardClaimed() {

@@ -8,14 +8,8 @@ import austeretony.alternateui.util.EnumGUIAlignment;
 import austeretony.oxygen_core.client.gui.menu.OxygenMenuEntry;
 import austeretony.oxygen_dailyrewards.client.gui.menu.DailyRewardsMenuEntry;
 import austeretony.oxygen_dailyrewards.client.settings.gui.EnumDailyRewardsGUISetting;
-import austeretony.oxygen_dailyrewards.common.main.DailyRewardsMain;
-import net.minecraft.util.ResourceLocation;
 
 public class DailyRewardsMenuScreen extends AbstractGUIScreen {
-
-    public static final ResourceLocation 
-    SPECIAL_ICON = new ResourceLocation(DailyRewardsMain.MODID, "textures/gui/special_icon.png"),
-    LOCKED_ICON = new ResourceLocation(DailyRewardsMain.MODID, "textures/gui/locked_icon.png");
 
     public static final OxygenMenuEntry DAILY_REWARDS_MENU_ENTRY = new DailyRewardsMenuEntry();
 
@@ -38,7 +32,7 @@ public class DailyRewardsMenuScreen extends AbstractGUIScreen {
             alignment = EnumGUIAlignment.CENTER;
             break;
         }
-        return new GUIWorkspace(this, 12 + 48 * 5 + 3, 128).setAlignment(alignment, 0, 0);
+        return new GUIWorkspace(this, 255, 116).setAlignment(alignment, 0, 0);
     }
 
     @Override

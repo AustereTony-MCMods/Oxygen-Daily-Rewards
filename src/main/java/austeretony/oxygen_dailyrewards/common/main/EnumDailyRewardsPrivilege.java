@@ -6,7 +6,7 @@ import austeretony.oxygen_core.common.privilege.PrivilegeRegistry;
 public enum EnumDailyRewardsPrivilege {
 
     DAILY_REWARDS_ACCESS("dailyrewards:dailyRewardsAccess", 1400, EnumValueType.BOOLEAN),
-    MAXIMUM_REWARDS_AMOUNT("dailyrewards:maximumRewardsAmount", 1401, EnumValueType.INT);
+    MAXIMUM_REWARDS_AMOUNT_PER_MONTH("dailyrewards:maximumRewardsAmountPerMonth", 1401, EnumValueType.INT);
 
     private final String name;
 
