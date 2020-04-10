@@ -15,7 +15,7 @@ public class DailyRewardsConfig extends AbstractConfig {
 
     REWARD_TIME_OFFSET_HOURS = ConfigValueUtils.getValue("server", "reward_time_offset_hours", 0, true),
     DAILY_REWARDS_ACCESS = ConfigValueUtils.getValue("server", "daily_reards_access", true, true),
-    MAXIMUM_REWARDS_AMOUNT_PER_MONTH = ConfigValueUtils.getValue("server", "maximum_rewards_amount_per_month", 31, true),
+    MAXIMUM_REWARDS_PER_MONTH = ConfigValueUtils.getValue("server", "maximum_rewards_per_month", 31, true),
     DEBUG_SCRIPTS = ConfigValueUtils.getValue("server", "debug_scripts", false),
     ADVANCED_LOGGING = ConfigValueUtils.getValue("server", "advanced_logging", false);
 
@@ -40,7 +40,7 @@ public class DailyRewardsConfig extends AbstractConfig {
 
         values.add(REWARD_TIME_OFFSET_HOURS);
         values.add(DAILY_REWARDS_ACCESS);
-        values.add(MAXIMUM_REWARDS_AMOUNT_PER_MONTH);
+        values.add(MAXIMUM_REWARDS_PER_MONTH);
         values.add(DEBUG_SCRIPTS);
         values.add(ADVANCED_LOGGING);
     }

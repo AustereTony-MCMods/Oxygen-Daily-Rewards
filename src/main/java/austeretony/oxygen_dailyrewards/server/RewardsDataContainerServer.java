@@ -9,6 +9,8 @@ import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import javax.annotation.Nullable;
 
@@ -17,10 +19,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import austeretony.oxygen_core.common.api.CommonReference;
 import austeretony.oxygen_core.common.api.OxygenHelperCommon;
 import austeretony.oxygen_core.common.item.ItemStackWrapper;
 import austeretony.oxygen_core.common.main.OxygenMain;
 import austeretony.oxygen_core.common.util.JsonUtils;
+import austeretony.oxygen_core.server.api.OxygenHelperServer;
 import austeretony.oxygen_core.server.api.TimeHelperServer;
 import austeretony.oxygen_dailyrewards.common.network.client.CPSyncRewardsData;
 import austeretony.oxygen_dailyrewards.common.reward.EnumReward;
@@ -41,6 +45,21 @@ public class RewardsDataContainerServer {
 
     public RewardsDataContainerServer(DailyRewardsManagerServer manager) {
         this.manager = manager;
+    }
+
+    public void reloadRewards() {
+        final Runnable reloadingTask = ()->{
+            Future future = OxygenHelperServer.addIOTask(this::loadRewardsData);
+            try {
+                future.get();
+            } catch (ExecutionException | InterruptedException exception) {
+                exception.printStackTrace();
+            }
+            OxygenHelperServer.getOnlinePlayersUUIDs().forEach(
+                    (playerUUID)->this.syncRewardsData(CommonReference.playerByUUID(playerUUID)));
+            OxygenMain.LOGGER.info("[Daily Rewards] Daily rewards reloaded.");
+        };
+        OxygenHelperServer.addRoutineTask(reloadingTask);
     }
 
     public void loadRewardsData() {
@@ -127,9 +146,14 @@ public class RewardsDataContainerServer {
 
     @Nullable
     public Reward getDailyReward(int day) {
-        if (this.rewards.size() >= day)
-            return this.rewards.get(day - 1);
-        return null;
+        Reward reward = null;
+        try {
+            reward = this.rewards.get(day - 1);
+        } catch (IndexOutOfBoundsException exception) {
+            OxygenMain.LOGGER.error("[Daily Rewards] Reward index <{}> out of bounds!", day);
+            exception.printStackTrace();
+        }
+        return reward;
     }
 
     public void syncRewardsData(@Nullable EntityPlayerMP playerMP) {

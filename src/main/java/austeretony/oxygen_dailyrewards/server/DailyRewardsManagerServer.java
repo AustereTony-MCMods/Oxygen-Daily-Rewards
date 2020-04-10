@@ -5,11 +5,8 @@ import java.time.Month;
 import java.time.ZonedDateTime;
 import java.time.format.TextStyle;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import austeretony.oxygen_core.common.api.CommonReference;
 import austeretony.oxygen_core.common.main.OxygenMain;
 import austeretony.oxygen_core.server.api.OxygenHelperServer;
 import austeretony.oxygen_core.server.api.TimeHelperServer;
@@ -51,7 +48,7 @@ public class DailyRewardsManagerServer {
         long initalDelay = Duration.between(currentTime, reloadingTime).getSeconds();
 
         OxygenHelperServer.getSchedulerExecutorService().scheduleAtFixedRate(
-                this::reloadRewards, 
+                this.rewardsDataContainer::reloadRewards, 
                 initalDelay, 
                 TimeUnit.DAYS.toSeconds(nextMonthLength), 
                 TimeUnit.SECONDS);
@@ -89,23 +86,8 @@ public class DailyRewardsManagerServer {
         OxygenHelperServer.addIOTask(this.rewardsDataContainer::loadRewardsData);
     }
 
-    public void onPlayerLoaded(EntityPlayerMP playerMP) {
+    public void playerLoaded(EntityPlayerMP playerMP) {
         this.rewardsDataContainer.syncRewardsData(playerMP);
-        this.playerDataManager.onPlayerLoaded(playerMP);
-    }
-
-    public void reloadRewards() {
-        Runnable reloadingTask = ()->{
-            Future future = OxygenHelperServer.addIOTask(this.rewardsDataContainer::loadRewardsData);
-            try {
-                future.get();
-            } catch (ExecutionException | InterruptedException exception) {
-                exception.printStackTrace();
-            }
-            OxygenHelperServer.getOnlinePlayersUUIDs().forEach(
-                    (playerUUID)->this.rewardsDataContainer.syncRewardsData(CommonReference.playerByUUID(playerUUID)));
-            OxygenMain.LOGGER.info("[Daily Rewards] Daily rewards reloaded.");
-        };
-        OxygenHelperServer.addRoutineTask(reloadingTask);
+        this.playerDataManager.playerLoaded(playerMP);
     }
 }

@@ -29,7 +29,7 @@ public enum EnumDailyRewardsPrivilege {
     }
 
     public static void register() {
-        for (EnumDailyRewardsPrivilege privilege : EnumDailyRewardsPrivilege.values())
+        for (EnumDailyRewardsPrivilege privilege : values())
             PrivilegeRegistry.registerPrivilege(privilege.name, privilege.id, privilege.type);
     }
 }

@@ -6,23 +6,34 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 
 import com.google.gson.JsonObject;
 
+import austeretony.alternateui.screen.core.GUIAdvancedElement;
+import austeretony.alternateui.screen.core.GUISimpleElement;
 import austeretony.oxygen_core.client.api.ClientReference;
 import austeretony.oxygen_core.common.api.CommonReference;
+import austeretony.oxygen_core.common.main.EnumOxygenStatusMessage;
 import austeretony.oxygen_core.common.main.OxygenMain;
 import austeretony.oxygen_core.common.scripting.ScriptWrapper;
 import austeretony.oxygen_core.common.scripting.ScriptingProvider;
 import austeretony.oxygen_core.common.scripting.Shell;
 import austeretony.oxygen_core.common.util.ByteBufUtils;
+import austeretony.oxygen_core.server.OxygenManagerServer;
+import austeretony.oxygen_core.server.api.InventoryProviderServer;
 import austeretony.oxygen_dailyrewards.common.config.DailyRewardsConfig;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class RewardScript implements Reward {
 
@@ -57,8 +68,8 @@ public class RewardScript implements Reward {
     }
 
     @Override
-    public long getAmount() {
-        return this.amount;
+    public String getTooltip() {
+        return this.tooltip;
     }
 
     @Override
@@ -90,7 +101,7 @@ public class RewardScript implements Reward {
             ImageIO.write(bufferedImage, "png", baos);
             this.iconRaw = baos.toByteArray();
         } catch (IOException exception) {
-            OxygenMain.LOGGER.info("[Daily Rewards] Failed to load reward icon: {}", iconName);
+            OxygenMain.LOGGER.error("[Daily Rewards] Failed to load reward icon: {}", iconName);
             exception.printStackTrace();
             this.iconRaw = new byte[0];
         }
@@ -100,7 +111,7 @@ public class RewardScript implements Reward {
         try {
             this.scriptWrapper = ScriptWrapper.fromFile(CommonReference.getGameFolder() + "/config/oxygen/data/server/daily rewards/scripts/" + scriptName, scriptName);
         } catch (IOException exception) {
-            OxygenMain.LOGGER.info("[Daily Rewards] Failed to load reward script: {}", scriptName);
+            OxygenMain.LOGGER.error("[Daily Rewards] Failed to load reward script: {}", scriptName);
             exception.printStackTrace();
         }
     }
@@ -131,27 +142,53 @@ public class RewardScript implements Reward {
     }
 
     @Override
-    public void rewardPlayer(EntityPlayerMP playerMP) {
+    public boolean rewardPlayer(EntityPlayerMP playerMP) {
+        if (InventoryProviderServer.getPlayerInventory().getEmptySlotsAmount(playerMP) < this.amount) {
+            OxygenManagerServer.instance().sendStatusMessage(playerMP, EnumOxygenStatusMessage.INVENTORY_FULL);
+            return false;
+        }      
+
         if (this.scriptWrapper != null) {
             Shell shell = ScriptingProvider.createShell();
 
             shell.put("world", playerMP.world);
             shell.put("player", playerMP);
 
-            shell.evaluate(this.scriptWrapper.getScriptText(), this.scriptWrapper.getName(), DailyRewardsConfig.DEBUG_SCRIPTS.asBoolean());
+            Object result = shell.evaluate(this.scriptWrapper.getScriptText(), this.scriptWrapper.getName(), DailyRewardsConfig.DEBUG_SCRIPTS.asBoolean());
 
-            if (DailyRewardsConfig.ADVANCED_LOGGING.asBoolean())
-                OxygenMain.LOGGER.info("[Daily Rewards] <{}/{}> [2]: player rewarded with SCRIPT - {}.", 
-                        CommonReference.getName(playerMP), 
-                        CommonReference.getPersistentUUID(playerMP),
-                        this.scriptWrapper.getName());
+            if (result != null && (Boolean) result) {
+                if (DailyRewardsConfig.ADVANCED_LOGGING.asBoolean())
+                    OxygenMain.LOGGER.info("[Daily Rewards] <{}/{}> [2]: player rewarded with SCRIPT - {}.", 
+                            CommonReference.getName(playerMP), 
+                            CommonReference.getPersistentUUID(playerMP),
+                            this.scriptWrapper.getName());
+                return true;
+            }
         }
+        return false;
     }
 
-    public String getTooltip() {
-        return this.tooltip;
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void draw(GUISimpleElement widget, int mouseX, int mouseY) {
+        Minecraft mc = ClientReference.getMinecraft();
+
+        int scaleFactor = (int) widget.getScale();
+
+        GlStateManager.pushMatrix();           
+        GlStateManager.translate(widget.getX(), widget.getY(), 0.0F);   
+
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+
+        GlStateManager.enableBlend(); 
+        mc.getTextureManager().bindTexture(this.getIconTexture());
+        GUIAdvancedElement.drawCustomSizedTexturedRect(0, 0, 0, 0, 48 * scaleFactor, 48 * scaleFactor, 48 * scaleFactor, 48 * scaleFactor);                 
+        GlStateManager.disableBlend();  
+
+        GlStateManager.popMatrix();
     }
 
+    @Nonnull
     public ResourceLocation getIconTexture() {
         if (this.iconTexture == null) {
             if (this.iconRaw.length > 0) {
@@ -170,5 +207,10 @@ public class RewardScript implements Reward {
             this.iconTexture = ClientReference.getMinecraft().getTextureManager().RESOURCE_LOCATION_EMPTY;
         }
         return this.iconTexture;
+    }
+
+    @Override
+    public ItemStack getItemStack() {
+        return null;
     }
 }

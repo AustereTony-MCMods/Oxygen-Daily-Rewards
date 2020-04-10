@@ -21,6 +21,6 @@ public class DailyRewardsEventsServer {
 
     @SubscribeEvent
     public void onPlayerLoaded(OxygenPlayerLoadedEvent event) {
-        DailyRewardsManagerServer.instance().onPlayerLoaded(event.playerMP);
+        DailyRewardsManagerServer.instance().playerLoaded(event.playerMP);
     }
 }

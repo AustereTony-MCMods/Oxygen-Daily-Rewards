@@ -1,12 +1,11 @@
 package austeretony.oxygen_dailyrewards.common.reward;
 
-import com.google.gson.JsonElement;
+import javax.annotation.Nullable;
 
 import austeretony.alternateui.screen.core.GUISimpleElement;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -18,11 +17,18 @@ public interface Reward {
 
     String getDescription();
 
-    long getAmount();
+    @Nullable
+    String getTooltip();
 
     boolean isSpecial();
 
     void write(ByteBuf buffer);
 
-    void rewardPlayer(EntityPlayerMP playerMP); 
+    boolean rewardPlayer(EntityPlayerMP playerMP); 
+
+    @SideOnly(Side.CLIENT)
+    void draw(GUISimpleElement widget, int mouseX, int mouseY);
+
+    @Nullable
+    ItemStack getItemStack();
 }

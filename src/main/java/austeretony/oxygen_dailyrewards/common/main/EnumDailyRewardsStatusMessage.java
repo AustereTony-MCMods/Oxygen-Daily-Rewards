@@ -8,7 +8,9 @@ public enum EnumDailyRewardsStatusMessage {
     DAILY_REWARD_CLAIMED("dailyRewardClaimed"),
     DAILY_REWARD_UNAVAILABLE("dailyRewardUnavailable"),
 
-    DAILY_REWARDS_RELOADED("dailyRewardReloaded");
+    DAILY_REWARDS_RELOADED("dailyRewardReloaded"),
+    PLAYER_LATEST_REWARD_RESET("playerLatestRewardReset"),
+    PLAYER_REWARDS_AMOUNT_SET("playerRewardsAmountSet");
 
     private final String status;
 

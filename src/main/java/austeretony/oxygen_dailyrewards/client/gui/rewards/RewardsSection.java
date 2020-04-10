@@ -92,21 +92,25 @@ public class RewardsSection extends AbstractGUISection {
         Reward reward;
         int 
         index = 0,
-        maximumRewards = PrivilegesProviderClient.getAsInt(EnumDailyRewardsPrivilege.MAXIMUM_REWARDS_AMOUNT_PER_MONTH.id(), DailyRewardsConfig.MAXIMUM_REWARDS_AMOUNT_PER_MONTH.asInt());
+        maximumRewards = PrivilegesProviderClient.getAsInt(EnumDailyRewardsPrivilege.MAXIMUM_REWARDS_AMOUNT_PER_MONTH.id(), DailyRewardsConfig.MAXIMUM_REWARDS_PER_MONTH.asInt());
         boolean rewarded, nextReward, locked, unreachable;
         for (int i = fromDay; i < fromDay + WIDGETS_PER_LIST; i++) {
             if (i > this.monthLength) break;
+
             reward = DailyRewardsManagerClient.instance().getRewardsDataContainer().getDailyReward(i);
-            rewarded = i <= this.daysRewarded;
-            nextReward = i == this.daysRewarded + 1 && i <= this.monthLength - this.currentDayOfMonth + 1;
-            locked = this.rewardClaimed || i > this.daysRewarded + 1;
-            unreachable = i > (this.monthLength - this.currentDayOfMonth + this.daysRewarded + (this.rewardClaimed ? 0 : 1)) || (maximumRewards != - 1 && i > maximumRewards);
-            if (index < 3)
-                this.framework.addElement(new DailyRewardWidget(6 + index++ * (WIDGET_WIDTH + 1), 16, reward, rewarded, nextReward, locked, unreachable));
-            else if (index < 6)
-                this.framework.addElement(new DailyRewardWidget(6 + (index++ - 3) * (WIDGET_WIDTH + 1), 16 + WIDGET_HEIGHT + 1, reward, rewarded, nextReward, locked, unreachable));
-            else if (index == 6)
-                this.framework.addElement(new DailyRewardWidgetBig(6 + 3 * (WIDGET_WIDTH + 1), 16, reward, rewarded, nextReward, locked, unreachable));
+            if (reward != null) {
+                rewarded = i <= this.daysRewarded;
+                nextReward = i == this.daysRewarded + 1 && i <= this.monthLength - this.currentDayOfMonth + 1;
+                locked = this.rewardClaimed || i > this.daysRewarded + 1;
+                unreachable = i > (this.monthLength - this.currentDayOfMonth + this.daysRewarded + (this.rewardClaimed ? 0 : 1)) || i > maximumRewards;
+
+                if (index < 3)
+                    this.framework.addElement(new DailyRewardWidget(6 + index++ * (WIDGET_WIDTH + 1), 16, reward, rewarded, nextReward, locked, unreachable));
+                else if (index < 6)
+                    this.framework.addElement(new DailyRewardWidget(6 + (index++ - 3) * (WIDGET_WIDTH + 1), 16 + WIDGET_HEIGHT + 1, reward, rewarded, nextReward, locked, unreachable));
+                else if (index == 6)
+                    this.framework.addElement(new DailyRewardWidgetBig(6 + 3 * (WIDGET_WIDTH + 1), 16, reward, rewarded, nextReward, locked, unreachable));
+            }
         }
     }
 

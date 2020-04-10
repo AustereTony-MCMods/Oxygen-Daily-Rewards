@@ -45,7 +45,7 @@ public class DailyRewardsMain {
     public static final String 
     MODID = "oxygen_dailyrewards",
     NAME = "Oxygen: Daily Rewards",
-    VERSION = "0.11.0",
+    VERSION = "0.11.1",
     VERSION_CUSTOM = VERSION + ":beta:0",
     GAME_VERSION = "1.12.2",
     VERSIONS_FORGE_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/Oxygen-Daily-Rewards/info/mod_versions_forge.json";

@@ -6,19 +6,30 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
+import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
 
 import com.google.gson.JsonObject;
 
+import austeretony.alternateui.screen.core.GUIAdvancedElement;
+import austeretony.alternateui.screen.core.GUISimpleElement;
 import austeretony.oxygen_core.client.api.ClientReference;
 import austeretony.oxygen_core.common.api.CommonReference;
+import austeretony.oxygen_core.common.main.EnumOxygenStatusMessage;
 import austeretony.oxygen_core.common.main.OxygenMain;
 import austeretony.oxygen_core.common.util.ByteBufUtils;
+import austeretony.oxygen_core.server.OxygenManagerServer;
+import austeretony.oxygen_core.server.api.InventoryProviderServer;
 import austeretony.oxygen_dailyrewards.common.config.DailyRewardsConfig;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class RewardCommand implements Reward {
 
@@ -50,8 +61,8 @@ public class RewardCommand implements Reward {
     }
 
     @Override
-    public long getAmount() {
-        return this.amount;
+    public String getTooltip() {
+        return this.tooltip;
     }
 
     @Override
@@ -83,7 +94,7 @@ public class RewardCommand implements Reward {
             ImageIO.write(bufferedImage, "png", baos);
             this.iconRaw = baos.toByteArray();
         } catch (IOException exception) {
-            OxygenMain.LOGGER.info("[Daily Rewards] Failed to load reward icon: {}", iconName);
+            OxygenMain.LOGGER.error("[Daily Rewards] Failed to load reward icon: {}", iconName);
             exception.printStackTrace();
             this.iconRaw = new byte[0];
         }
@@ -115,8 +126,14 @@ public class RewardCommand implements Reward {
     }
 
     @Override
-    public void rewardPlayer(EntityPlayerMP playerMP) {
+    public boolean rewardPlayer(EntityPlayerMP playerMP) {
+        if (InventoryProviderServer.getPlayerInventory().getEmptySlotsAmount(playerMP) < this.amount) {
+            OxygenManagerServer.instance().sendStatusMessage(playerMP, EnumOxygenStatusMessage.INVENTORY_FULL);
+            return false;
+        }       
+
         String[] commands = this.commands.split("[;]");
+        int result;
         for (String command : commands) {
             if (command.contains("@p"))
                 command = command.replace("@p", CommonReference.getName(playerMP));
@@ -130,7 +147,13 @@ public class RewardCommand implements Reward {
             if (command.contains("@dim"))
                 command = command.replace("@dim", String.valueOf(playerMP.dimension));
 
-            CommonReference.getServer().commandManager.executeCommand(CommonReference.getServer(), command);
+            result = CommonReference.getServer().commandManager.executeCommand(CommonReference.getServer(), command);
+
+            if (result == 0)
+                OxygenMain.LOGGER.info("[Daily Rewards] <{}/{}> Failed to execute command: {}.", 
+                        CommonReference.getName(playerMP), 
+                        CommonReference.getPersistentUUID(playerMP),
+                        command);
         }
 
         if (DailyRewardsConfig.ADVANCED_LOGGING.asBoolean())
@@ -138,13 +161,31 @@ public class RewardCommand implements Reward {
                     CommonReference.getName(playerMP), 
                     CommonReference.getPersistentUUID(playerMP),
                     this.commands);
+        return true;
     }
 
-    public String getTooltip() {
-        return this.tooltip;
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void draw(GUISimpleElement widget, int mouseX, int mouseY) {
+        Minecraft mc = ClientReference.getMinecraft();
+
+        int scaleFactor = (int) widget.getScale();
+
+        GlStateManager.pushMatrix();           
+        GlStateManager.translate(widget.getX(), widget.getY(), 0.0F);   
+
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+
+        GlStateManager.enableBlend(); 
+        mc.getTextureManager().bindTexture(this.getIconTexture());
+        GUIAdvancedElement.drawCustomSizedTexturedRect(0, 0, 0, 0, 48 * scaleFactor, 48 * scaleFactor, 48 * scaleFactor, 48 * scaleFactor);                 
+        GlStateManager.disableBlend();  
+
+        GlStateManager.popMatrix();
     }
 
-    public ResourceLocation getIconTexture() {
+    @Nonnull
+    private ResourceLocation getIconTexture() {
         if (this.iconTexture == null) {
             if (this.iconRaw.length > 0) {
                 ByteArrayInputStream baos = new ByteArrayInputStream(this.iconRaw);
@@ -162,5 +203,10 @@ public class RewardCommand implements Reward {
             this.iconTexture = ClientReference.getMinecraft().getTextureManager().RESOURCE_LOCATION_EMPTY;
         }
         return this.iconTexture;
+    }
+
+    @Override
+    public ItemStack getItemStack() {
+        return null;
     }
 }

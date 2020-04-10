@@ -3,6 +3,8 @@ package austeretony.oxygen_dailyrewards.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import austeretony.oxygen_core.common.main.OxygenMain;
 import austeretony.oxygen_dailyrewards.common.reward.EnumReward;
 import austeretony.oxygen_dailyrewards.common.reward.Reward;
@@ -22,8 +24,16 @@ public class RewardsDataContainerClient {
         return this.rewards;
     }
 
+    @Nullable
     public Reward getDailyReward(int day) {
-        return this.rewards.get(day - 1);
+        Reward reward = null;
+        try {
+            reward = this.rewards.get(day - 1);
+        } catch (IndexOutOfBoundsException exception) {
+            OxygenMain.LOGGER.error("[Daily Rewards] Reward index <{}> out of bounds!", day);
+            exception.printStackTrace();
+        }
+        return reward;
     }
 
     public void rewardsDataReceived(ByteBuf buffer) {

@@ -39,11 +39,12 @@ public class RewardsPlayerDataClient {
         lastTimePlayerRewarded = TimeHelperClient.getServerZonedDateTime(this.lastRewardTimeMillis),
         nextRewardTime = lastTimePlayerRewarded.plusDays(1L).withHour(DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt()).withMinute(0).withSecond(0);
 
-        if (lastTimePlayerRewarded.getMonthValue() != currentServerTime.getMonthValue()
+        if (this.lastRewardTimeMillis != 0L 
+                && lastTimePlayerRewarded.getMonthValue() != currentServerTime.getMonthValue()
                 && currentServerTime.getHour() >= DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt())
             this.daysRewarded = 0;
 
-        int maximumRewards = PrivilegesProviderClient.getAsInt(EnumDailyRewardsPrivilege.MAXIMUM_REWARDS_AMOUNT_PER_MONTH.id(), DailyRewardsConfig.MAXIMUM_REWARDS_AMOUNT_PER_MONTH.asInt());
+        int maximumRewards = PrivilegesProviderClient.getAsInt(EnumDailyRewardsPrivilege.MAXIMUM_REWARDS_AMOUNT_PER_MONTH.id(), DailyRewardsConfig.MAXIMUM_REWARDS_PER_MONTH.asInt());
         if (!PrivilegesProviderClient.getAsBoolean(EnumDailyRewardsPrivilege.DAILY_REWARDS_ACCESS.id(), DailyRewardsConfig.DAILY_REWARDS_ACCESS.asBoolean())
                 || this.daysRewarded >= maximumRewards)
             return false;

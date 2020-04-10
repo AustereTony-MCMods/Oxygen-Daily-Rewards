@@ -36,11 +36,12 @@ public class RewardsPlayerDataServer extends AbstractPersistentData {
         if (Period.between(lastTimePlayerRewarded.toLocalDate(), currentTime.toLocalDate()).getDays() >= 2)
             this.rewardedDaysSeries = 0;
 
-        if (lastTimePlayerRewarded.getMonthValue() != currentTime.getMonthValue()
+        if (this.lastRewardTimeMillis != 0L 
+                && lastTimePlayerRewarded.getMonthValue() != currentTime.getMonthValue()
                 && currentTime.getHour() >= DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt())
             this.daysRewarded = 0;
 
-        int maximumRewards = PrivilegesProviderServer.getAsInt(playerUUID, EnumDailyRewardsPrivilege.MAXIMUM_REWARDS_AMOUNT_PER_MONTH.id(), DailyRewardsConfig.MAXIMUM_REWARDS_AMOUNT_PER_MONTH.asInt());
+        int maximumRewards = PrivilegesProviderServer.getAsInt(playerUUID, EnumDailyRewardsPrivilege.MAXIMUM_REWARDS_AMOUNT_PER_MONTH.id(), DailyRewardsConfig.MAXIMUM_REWARDS_PER_MONTH.asInt());
         if (!PrivilegesProviderServer.getAsBoolean(playerUUID, EnumDailyRewardsPrivilege.DAILY_REWARDS_ACCESS.id(), DailyRewardsConfig.DAILY_REWARDS_ACCESS.asBoolean())
                 || this.daysRewarded >= maximumRewards)
             return false;
@@ -74,9 +75,13 @@ public class RewardsPlayerDataServer extends AbstractPersistentData {
         return this.lastRewardTimeMillis;
     }
 
+    public void setLastRewardTimeMillis(long millis) {
+        this.lastRewardTimeMillis = millis;
+    }
+
     @Override
     public String getDisplayName() {
-        return "daily_rewards_player_data";
+        return "dailyrewards:player_data";
     }
 
     @Override

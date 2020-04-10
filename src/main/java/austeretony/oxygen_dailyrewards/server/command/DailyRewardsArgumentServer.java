@@ -21,10 +21,9 @@ public class DailyRewardsArgumentServer implements ArgumentExecutor {
     @Override
     public void process(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (OxygenHelperServer.isNetworkRequestAvailable(CommonReference.getPersistentUUID((EntityPlayerMP) sender), DailyRewardsMain.CLAIM_REWARD_REQUEST_ID)) {
-            if (args.length == 2) {
+            if (args.length == 2)
                 if (args[1].equals("-claim"))
                     DailyRewardsManagerServer.instance().getPlayerDataManager().claimReward(CommandBase.getCommandSenderAsPlayer(sender));
-            }
         }
     }
 }

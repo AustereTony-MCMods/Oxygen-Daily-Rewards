@@ -20,7 +20,10 @@ oxygen_dailyrewards.description.currency=Валюта
 oxygen_dailyrewards.status.message.dailyRewardAvailable=Доступна ежедневная награда 
 oxygen_dailyrewards.status.message.dailyRewardClaimed=Ежедневная награда получена
 oxygen_dailyrewards.status.message.dailyRewardUnavailable=Ежедневная награда недоступна
+
 oxygen_dailyrewards.status.message.dailyRewardReloaded=Ежедневные награды перезагружены
+oxygen_dailyrewards.status.message.playerLatestRewardReset=Последняя ежедневная награда сброшена
+oxygen_dailyrewards.status.message.playerRewardsAmountSet=Количество полученных наград установлено
 
 oxygen_dailyrewards.status.message.dailyRewardAvailable=Доступна ежедневная награда: 
 oxygen_dailyrewards.status.message.clickHere=кликнуть здесь

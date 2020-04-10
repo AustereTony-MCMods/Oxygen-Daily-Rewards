@@ -5,39 +5,27 @@ import austeretony.alternateui.screen.core.GUISimpleElement;
 import austeretony.alternateui.util.EnumGUIAlignment;
 import austeretony.oxygen_core.client.api.ClientReference;
 import austeretony.oxygen_core.client.api.EnumBaseGUISetting;
-import austeretony.oxygen_core.client.api.OxygenHelperClient;
-import austeretony.oxygen_core.client.currency.CurrencyProperties;
 import austeretony.oxygen_core.client.gui.OxygenGUITextures;
 import austeretony.oxygen_core.client.gui.OxygenGUIUtils;
 import austeretony.oxygen_dailyrewards.common.reward.Reward;
-import austeretony.oxygen_dailyrewards.common.reward.RewardCommand;
-import austeretony.oxygen_dailyrewards.common.reward.RewardCurrency;
-import austeretony.oxygen_dailyrewards.common.reward.RewardItem;
-import austeretony.oxygen_dailyrewards.common.reward.RewardScript;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 
 public class DailyRewardWidget extends GUISimpleElement<DailyRewardWidget> {
 
-    private final String dayStr, descriptionStr, amountStr, rewardAvailableStr, nextRewardStr;
+    private final String dayStr, descriptionStr, rewardAvailableStr, nextRewardStr;
 
     private final boolean special, rewarded, nextReward, locked, unreachable;
 
-    private ItemStack itemStack;
-
-    private CurrencyProperties currencyProperties;
-
-    private ResourceLocation iconTexture;
+    private final Reward reward;
 
     public DailyRewardWidget(int xPosition, int yPosition, Reward reward, boolean rewarded, boolean nextReward, boolean locked, boolean unreachable) {
         this.setPosition(xPosition, yPosition);
         this.setSize(48, 48);
 
+        this.setScale(1.0F);
+
         this.dayStr = ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.rewardDay", reward.getDay());
         this.descriptionStr = ClientReference.localize(reward.getDescription());
-        this.amountStr = ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.amount", reward.getAmount());
 
         this.rewardAvailableStr = ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.rewardAvailable");
         this.nextRewardStr = ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.nextReward");
@@ -48,23 +36,10 @@ public class DailyRewardWidget extends GUISimpleElement<DailyRewardWidget> {
         this.locked = locked;
         this.unreachable = unreachable;
 
-        switch (reward.getType()) {
-        case ITEM:
-            this.itemStack = ((RewardItem) reward).getStackWrapper().getCachedItemStack();
-            break;
-        case CURRENCY:
-            this.currencyProperties = OxygenHelperClient.getCurrencyProperties(((RewardCurrency) reward).getCurrencyIndex());
-            this.initTooltip(this.currencyProperties.getLocalizedName(), EnumBaseGUISetting.TOOLTIP_TEXT_COLOR.get().asInt(), EnumBaseGUISetting.TOOLTIP_BACKGROUND_COLOR.get().asInt(), EnumBaseGUISetting.TEXT_TOOLTIP_SCALE.get().asFloat());
-            break;
-        case COMMAND:
-            this.iconTexture = ((RewardCommand) reward).getIconTexture();
-            this.initTooltip(((RewardCommand) reward).getTooltip(), EnumBaseGUISetting.TOOLTIP_TEXT_COLOR.get().asInt(), EnumBaseGUISetting.TOOLTIP_BACKGROUND_COLOR.get().asInt(), EnumBaseGUISetting.TEXT_TOOLTIP_SCALE.get().asFloat());
-            break;
-        case SCRIPT:
-            this.iconTexture = ((RewardScript) reward).getIconTexture();
-            this.initTooltip(((RewardScript) reward).getTooltip(), EnumBaseGUISetting.TOOLTIP_TEXT_COLOR.get().asInt(), EnumBaseGUISetting.TOOLTIP_BACKGROUND_COLOR.get().asInt(), EnumBaseGUISetting.TEXT_TOOLTIP_SCALE.get().asFloat());
-            break;
-        }
+        this.reward = reward;
+
+        if (reward.getTooltip() != null)
+            this.initTooltip(reward.getTooltip(), EnumBaseGUISetting.TOOLTIP_TEXT_COLOR.get().asInt(), EnumBaseGUISetting.TOOLTIP_BACKGROUND_COLOR.get().asInt(), EnumBaseGUISetting.TEXT_TOOLTIP_SCALE.get().asFloat());
 
         this.setDynamicBackgroundColor(EnumBaseGUISetting.ELEMENT_ENABLED_COLOR.get().asInt(), EnumBaseGUISetting.INACTIVE_ELEMENT_COLOR.get().asInt(), EnumBaseGUISetting.ELEMENT_HOVERED_COLOR.get().asInt());
         this.setTextDynamicColor(EnumBaseGUISetting.TEXT_ENABLED_COLOR.get().asInt(), EnumBaseGUISetting.TEXT_DARK_ENABLED_COLOR.get().asInt(), EnumBaseGUISetting.ACTIVE_ELEMENT_COLOR.get().asInt());
@@ -105,33 +80,7 @@ public class DailyRewardWidget extends GUISimpleElement<DailyRewardWidget> {
             this.mc.fontRenderer.drawString(this.dayStr, 0, 0, this.getEnabledTextColor(), false); 
             GlStateManager.popMatrix();
 
-            if (this.iconTexture == null) {
-                GlStateManager.pushMatrix();           
-                GlStateManager.translate((this.getWidth() - this.textWidth(this.amountStr, this.getTextScale() - 0.1F)) / 2.0F, this.itemStack != null ? 34.0F : 30.0F, 0.0F);            
-                GlStateManager.scale(this.getTextScale() - 0.1F, this.getTextScale() - 0.1F, 0.0F);   
-                this.mc.fontRenderer.drawString(this.amountStr, 0, 0, this.getEnabledTextColor(), false); 
-                GlStateManager.popMatrix();
-            }
-
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-
-            if (this.itemStack != null) {
-                RenderHelper.enableGUIStandardItemLighting();            
-                GlStateManager.enableDepth();
-                this.itemRender.renderItemAndEffectIntoGUI(this.itemStack, 16, 16);    
-                GlStateManager.disableDepth();
-                RenderHelper.disableStandardItemLighting();
-            } else if (this.currencyProperties != null) {
-                GlStateManager.enableBlend(); 
-                this.mc.getTextureManager().bindTexture(this.currencyProperties.getIcon());
-                GUIAdvancedElement.drawCustomSizedTexturedRect(20 + this.currencyProperties.getXOffset(), 20 + this.currencyProperties.getYOffset(), 0, 0, this.currencyProperties.getIconWidth(), this.currencyProperties.getIconHeight(), this.currencyProperties.getIconWidth(), this.currencyProperties.getIconHeight());                 
-                GlStateManager.disableBlend();   
-            } else if (this.iconTexture != null) {
-                GlStateManager.enableBlend(); 
-                this.mc.getTextureManager().bindTexture(this.iconTexture);
-                GUIAdvancedElement.drawCustomSizedTexturedRect(0, 0, 0, 0, 48, 48, 48, 48);                 
-                GlStateManager.disableBlend();  
-            }
 
             GlStateManager.pushMatrix();           
             GlStateManager.translate(2.0F, this.getHeight() - 6.0F, 0.0F);            
@@ -164,13 +113,15 @@ public class DailyRewardWidget extends GUISimpleElement<DailyRewardWidget> {
             }
 
             GlStateManager.popMatrix();
+
+            this.reward.draw(this, mouseX, mouseY);
         }
     }
 
     @Override
     public void drawTooltip(int mouseX, int mouseY) {
-        if (this.itemStack != null && mouseX >= this.getX() + 16 && mouseY >= this.getY() + 16 && mouseX < this.getX() + 32 && mouseY < this.getY() + 32)
-            this.screen.drawToolTip(this.itemStack, mouseX, mouseY);
+        if (this.reward.getItemStack() != null && mouseX >= this.getX() + 16 && mouseY >= this.getY() + 16 && mouseX < this.getX() + 32 && mouseY < this.getY() + 32)
+            this.screen.drawToolTip(this.reward.getItemStack(), mouseX, mouseY);
         else if (this.hasTooltip() && mouseX >= this.getX() + 16 && mouseY >= this.getY() + 20 && mouseX < this.getX() + 32 && mouseY < this.getY() + 28) {
             float 
             width = this.textWidth(this.getTooltipText(), this.getTooltipScaleFactor()) + 6.0F,

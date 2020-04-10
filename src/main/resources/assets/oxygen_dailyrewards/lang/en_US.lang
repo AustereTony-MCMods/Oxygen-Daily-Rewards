@@ -22,7 +22,10 @@ oxygen_dailyrewards.description.currency=Currency
 oxygen_dailyrewards.status.message.dailyRewardAvailable=You have available daily reward 
 oxygen_dailyrewards.status.message.dailyRewardClaimed=Daily reward claimed
 oxygen_dailyrewards.status.message.dailyRewardUnavailable=Daily reward unavailable
+
 oxygen_dailyrewards.status.message.dailyRewardReloaded=Daily rewards reloaded
+oxygen_dailyrewards.status.message.playerLatestRewardReset=Latest daily reward reset
+oxygen_dailyrewards.status.message.playerRewardsAmountSet=Rewards amount set
 
 oxygen_dailyrewards.status.message.dailyRewardAvailable=You have available daily reward: 
 oxygen_dailyrewards.status.message.clickHere=click here
