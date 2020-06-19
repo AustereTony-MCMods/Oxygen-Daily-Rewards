@@ -21,6 +21,7 @@ import austeretony.oxygen_dailyrewards.client.gui.settings.DailyRewardsSettingsC
 import austeretony.oxygen_dailyrewards.client.settings.EnumDailyRewardsClientSettings;
 import austeretony.oxygen_dailyrewards.client.settings.gui.EnumDailyRewardsGUISetting;
 import austeretony.oxygen_dailyrewards.common.config.DailyRewardsConfig;
+import austeretony.oxygen_dailyrewards.common.network.client.CPOpenDailyRewardsMenu;
 import austeretony.oxygen_dailyrewards.common.network.client.CPSyncPlayerData;
 import austeretony.oxygen_dailyrewards.common.network.client.CPSyncRewardsData;
 import austeretony.oxygen_dailyrewards.server.DailyRewardsManagerServer;
@@ -37,7 +38,7 @@ import net.minecraftforge.fml.relauncher.Side;
         modid = DailyRewardsMain.MODID, 
         name = DailyRewardsMain.NAME, 
         version = DailyRewardsMain.VERSION,
-        dependencies = "required-after:oxygen_core@[0.11.0,);",
+        dependencies = "required-after:oxygen_core@[0.11.1,);",
         certificateFingerprint = "@FINGERPRINT@",
         updateJSON = DailyRewardsMain.VERSIONS_FORGE_URL)
 public class DailyRewardsMain {
@@ -45,7 +46,7 @@ public class DailyRewardsMain {
     public static final String 
     MODID = "oxygen_dailyrewards",
     NAME = "Oxygen: Daily Rewards",
-    VERSION = "0.11.1",
+    VERSION = "0.11.2",
     VERSION_CUSTOM = VERSION + ":beta:0",
     GAME_VERSION = "1.12.2",
     VERSIONS_FORGE_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/Oxygen-Daily-Rewards/info/mod_versions_forge.json";
@@ -96,5 +97,6 @@ public class DailyRewardsMain {
     private void initNetwork() {
         OxygenMain.network().registerPacket(CPSyncRewardsData.class);
         OxygenMain.network().registerPacket(CPSyncPlayerData.class);
+        OxygenMain.network().registerPacket(CPOpenDailyRewardsMenu.class);
     }
 }

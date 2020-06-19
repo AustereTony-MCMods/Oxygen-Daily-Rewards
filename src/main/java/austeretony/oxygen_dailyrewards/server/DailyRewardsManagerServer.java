@@ -34,28 +34,30 @@ public class DailyRewardsManagerServer {
     }
 
     private void scheduleRepeatableProcesses() {
-        //scheduling rewards reloading when new month starts
-        ZonedDateTime 
-        currentTime = TimeHelperServer.getZonedDateTime(),
-        reloadingTime = currentTime.withDayOfMonth(1).withHour(DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt()).withMinute(0).withSecond(0).withNano(0);
+        if (DailyRewardsConfig.REWARD_MODE.asInt() == 0) {
+            //scheduling rewards reloading when new month starts
+            ZonedDateTime 
+            currentTime = TimeHelperServer.getZonedDateTime(),
+            reloadingTime = currentTime.withDayOfMonth(1).withHour(DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt()).withMinute(0).withSecond(0);
 
-        if (currentTime.compareTo(reloadingTime) > 0)
-            reloadingTime = reloadingTime.plusMonths(1L);
+            if (currentTime.compareTo(reloadingTime) > 0)
+                reloadingTime = reloadingTime.plusMonths(1L);
 
-        Month nextMonth = reloadingTime.getMonth();
-        int nextMonthLength = reloadingTime.toLocalDate().isLeapYear() ? nextMonth.maxLength() : nextMonth.minLength();
+            Month nextMonth = reloadingTime.getMonth();
+            int nextMonthLength = reloadingTime.toLocalDate().isLeapYear() ? nextMonth.maxLength() : nextMonth.minLength();
 
-        long initalDelay = Duration.between(currentTime, reloadingTime).getSeconds();
+            long initalDelay = Duration.between(currentTime, reloadingTime).getSeconds();
 
-        OxygenHelperServer.getSchedulerExecutorService().scheduleAtFixedRate(
-                this.rewardsDataContainer::reloadRewards, 
-                initalDelay, 
-                TimeUnit.DAYS.toSeconds(nextMonthLength), 
-                TimeUnit.SECONDS);
+            OxygenHelperServer.getSchedulerExecutorService().scheduleAtFixedRate(
+                    this.rewardsDataContainer::reloadRewards, 
+                    initalDelay, 
+                    TimeUnit.DAYS.toSeconds(nextMonthLength), 
+                    TimeUnit.SECONDS);
 
-        OxygenMain.LOGGER.info("[Daily Rewards] Scheduled rewards reloading for <{}> at: {}", 
-                nextMonth.getDisplayName(TextStyle.FULL, Locale.ENGLISH),
-                OxygenMain.DEBUG_DATE_TIME_FORMATTER.format(reloadingTime));
+            OxygenMain.LOGGER.info("[Daily Rewards] Scheduled rewards reloading for <{}> at: {}", 
+                    nextMonth.getDisplayName(TextStyle.FULL, Locale.ENGLISH),
+                    OxygenMain.DEBUG_DATE_TIME_FORMATTER.format(reloadingTime));
+        }
     }
 
     public static void create() {

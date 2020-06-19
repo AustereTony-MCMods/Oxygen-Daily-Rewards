@@ -40,7 +40,7 @@ public class RewardsSection extends AbstractGUISection {
 
     //cache
 
-    private int currentDayOfMonth, daysRewarded, monthLength, listedWeek;
+    private int currentDay, daysRewarded, totalRewardsAmount, listedWeek, maxListedWeek;
 
     private boolean initialized, rewardClaimed;
 
@@ -50,17 +50,27 @@ public class RewardsSection extends AbstractGUISection {
 
     @Override
     public void init() {
-        ZonedDateTime currentTime = TimeHelperClient.getServerZonedDateTime();
-        this.currentDayOfMonth = currentTime.getDayOfMonth();
-
-        Month month = currentTime.getMonth();
-        this.monthLength = month.minLength();
-        if (month == Month.FEBRUARY && currentTime.toLocalDate().isLeapYear())
-            this.monthLength = 29;
-
         this.addElement(new OxygenDefaultBackgroundWithButtonsFiller(0, 0, this.getWidth(), this.getHeight()));
-        String monthName = ClientReference.localize("oxygen_core.month." + month.getDisplayName(TextStyle.FULL, Locale.ROOT).toLowerCase());
-        this.addElement(new OxygenTextLabel(4, 12, ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.title", monthName), EnumBaseGUISetting.TEXT_TITLE_SCALE.get().asFloat(), EnumBaseGUISetting.TEXT_ENABLED_COLOR.get().asInt()));
+
+        String menuTitle = ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.menu.title");
+        this.currentDay = 0;
+        this.totalRewardsAmount = DailyRewardsManagerClient.instance().getRewardsDataContainer().getRewards().size();
+        if (DailyRewardsConfig.REWARD_MODE.asInt() == 0) {
+            ZonedDateTime currentTime = TimeHelperClient.getServerZonedDateTime();
+            this.currentDay = currentTime.getDayOfMonth();
+
+            Month month = currentTime.getMonth();
+            if (month == Month.FEBRUARY)
+                this.totalRewardsAmount = Month.FEBRUARY.length(currentTime.toLocalDate().isLeapYear());
+            else
+                this.totalRewardsAmount = month.minLength();
+
+            String monthName = ClientReference.localize("oxygen_core.month." + month.getDisplayName(TextStyle.FULL, Locale.ROOT).toLowerCase());
+            menuTitle = ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.title", monthName);
+        }
+        this.maxListedWeek = this.totalRewardsAmount / 7 + (this.totalRewardsAmount % 7 == 0 ? 0 : 1);
+
+        this.addElement(new OxygenTextLabel(4, 12, menuTitle, EnumBaseGUISetting.TEXT_TITLE_SCALE.get().asFloat(), EnumBaseGUISetting.TEXT_ENABLED_COLOR.get().asInt()));
 
         this.addElement(this.claimRewardButton = new OxygenKeyButton(0, this.getY() + this.getHeight() + this.screen.guiTop - 8, ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.button.claimReward"), Keyboard.KEY_E, this::claimReward).disable());     
         this.addElement(this.nextRewardTimeLabel = new OxygenTextLabel(this.getWidth(), this.getY() + this.getHeight() + this.screen.guiTop - 1, "", EnumBaseGUISetting.TEXT_SUB_SCALE.get().asFloat(), EnumBaseGUISetting.TEXT_ENABLED_COLOR.get().asInt()));
@@ -95,14 +105,14 @@ public class RewardsSection extends AbstractGUISection {
         maximumRewards = PrivilegesProviderClient.getAsInt(EnumDailyRewardsPrivilege.MAXIMUM_REWARDS_AMOUNT_PER_MONTH.id(), DailyRewardsConfig.MAXIMUM_REWARDS_PER_MONTH.asInt());
         boolean rewarded, nextReward, locked, unreachable;
         for (int i = fromDay; i < fromDay + WIDGETS_PER_LIST; i++) {
-            if (i > this.monthLength) break;
+            if (i > this.totalRewardsAmount) break;
 
             reward = DailyRewardsManagerClient.instance().getRewardsDataContainer().getDailyReward(i);
             if (reward != null) {
                 rewarded = i <= this.daysRewarded;
-                nextReward = i == this.daysRewarded + 1 && i <= this.monthLength - this.currentDayOfMonth + 1;
+                nextReward = i == this.daysRewarded + 1 && i <= this.totalRewardsAmount - this.currentDay + 1;
                 locked = this.rewardClaimed || i > this.daysRewarded + 1;
-                unreachable = i > (this.monthLength - this.currentDayOfMonth + this.daysRewarded + (this.rewardClaimed ? 0 : 1)) || i > maximumRewards;
+                unreachable = i > (this.totalRewardsAmount - this.currentDay + this.daysRewarded + (this.rewardClaimed ? 0 : 1)) || i > maximumRewards;
 
                 if (index < 3)
                     this.framework.addElement(new DailyRewardWidget(6 + index++ * (WIDGET_WIDTH + 1), 16, reward, rewarded, nextReward, locked, unreachable));
@@ -118,7 +128,7 @@ public class RewardsSection extends AbstractGUISection {
         this.claimRewardButton.setEnabled(!this.rewardClaimed);
 
         this.prevWeekButton.setEnabled(this.listedWeek != 0);
-        this.nextWeekButton.setEnabled(this.listedWeek < 4);
+        this.nextWeekButton.setEnabled(this.listedWeek < (this.maxListedWeek - 1));
     }
 
     private void claimReward() {
@@ -160,7 +170,7 @@ public class RewardsSection extends AbstractGUISection {
             }
 
             this.nextRewardTimeLabel.setDisplayText(String.format("%d:%02d:%02d %s", duration.getSeconds() / 3600, (duration.getSeconds() % 3600) / 60, (duration.getSeconds() % 60), 
-                    this.currentDayOfMonth == this.monthLength ? ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.nextMonthBegins") : ""));
+                    this.currentDay == this.totalRewardsAmount ? ClientReference.localize("oxygen_dailyrewards.gui.dailyrewards.nextMonthBegins") : ""));
 
             ScaledResolution sr = new ScaledResolution(this.mc);
             this.nextRewardTimeLabel.setX(sr.getScaledWidth() - this.screen.guiLeft - 4 - this.textWidth(this.nextRewardTimeLabel.getDisplayText(), this.nextRewardTimeLabel.getTextScale()));
@@ -176,7 +186,7 @@ public class RewardsSection extends AbstractGUISection {
         this.rewardClaimed = true;
         this.daysRewarded++;
         this.listedWeek = (this.daysRewarded + 1) / WIDGETS_PER_LIST;
-        this.listRewards(this.listedWeek * WIDGETS_PER_LIST + 1);
+        this.listRewards(DailyRewardsConfig.REWARD_MODE.asInt() == 0 ? this.listedWeek * WIDGETS_PER_LIST + 1 : 1);
 
         this.updateButtonsState();
     }

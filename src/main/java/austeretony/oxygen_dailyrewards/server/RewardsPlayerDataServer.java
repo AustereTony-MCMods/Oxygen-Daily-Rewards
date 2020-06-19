@@ -36,8 +36,10 @@ public class RewardsPlayerDataServer extends AbstractPersistentData {
         if (Period.between(lastTimePlayerRewarded.toLocalDate(), currentTime.toLocalDate()).getDays() >= 2)
             this.rewardedDaysSeries = 0;
 
+        boolean resetRewards = DailyRewardsConfig.REWARD_MODE.asInt() == 0 ? lastTimePlayerRewarded.getMonthValue() != currentTime.getMonthValue() : this.daysRewarded >= DailyRewardsManagerServer.instance().getRewardsDataContainer().getRewards().size();
+
         if (this.lastRewardTimeMillis != 0L 
-                && lastTimePlayerRewarded.getMonthValue() != currentTime.getMonthValue()
+                && resetRewards
                 && currentTime.getHour() >= DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt())
             this.daysRewarded = 0;
 
@@ -81,7 +83,7 @@ public class RewardsPlayerDataServer extends AbstractPersistentData {
 
     @Override
     public String getDisplayName() {
-        return "dailyrewards:player_data";
+        return "dailyrewards:player_data_server";
     }
 
     @Override

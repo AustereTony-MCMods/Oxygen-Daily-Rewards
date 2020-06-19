@@ -23,14 +23,17 @@ public class PlayersDataManagerServer {
     public void playerLoaded(EntityPlayerMP playerMP) {
         final Runnable task = ()->{
             UUID playerUUID = CommonReference.getPersistentUUID(playerMP);
-            RewardsPlayerDataServer playerData = this.manager.getPlayerDataContainer().createPlayerData(playerUUID);
 
-            OxygenMain.network().sendTo(new CPSyncPlayerData(
-                    playerData.getDaysRewarded(), 
-                    playerData.getLastRewardTimeMillis()), playerMP);
+            RewardsPlayerDataServer playerData = this.manager.getPlayerDataContainer().getPlayerData(playerUUID);
+            if (playerData == null) {
+                playerData = this.manager.getPlayerDataContainer().createPlayerData(playerUUID);
+                OxygenMain.network().sendTo(new CPSyncPlayerData(
+                        playerData.getDaysRewarded(), 
+                        playerData.getLastRewardTimeMillis()), playerMP);
 
-            if (playerData.isRewardAvailable(playerUUID))
-                OxygenHelperServer.sendStatusMessage(playerMP, DailyRewardsMain.DAILY_REWARDS_MOD_INDEX, EnumDailyRewardsStatusMessage.DAILY_REWARD_AVAILABLE.ordinal());
+                if (playerData.isRewardAvailable(playerUUID))
+                    OxygenHelperServer.sendStatusMessage(playerMP, DailyRewardsMain.DAILY_REWARDS_MOD_INDEX, EnumDailyRewardsStatusMessage.DAILY_REWARD_AVAILABLE.ordinal());
+            }
         };
         OxygenHelperServer.addRoutineTask(task);
     }

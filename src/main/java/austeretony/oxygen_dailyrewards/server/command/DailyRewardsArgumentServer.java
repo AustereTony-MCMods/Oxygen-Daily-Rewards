@@ -1,5 +1,10 @@
 package austeretony.oxygen_dailyrewards.server.command;
 
+import java.util.Collections;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import austeretony.oxygen_core.common.api.CommonReference;
 import austeretony.oxygen_core.common.command.ArgumentExecutor;
 import austeretony.oxygen_core.server.api.OxygenHelperServer;
@@ -10,6 +15,7 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
 
 public class DailyRewardsArgumentServer implements ArgumentExecutor {
 
@@ -25,5 +31,12 @@ public class DailyRewardsArgumentServer implements ArgumentExecutor {
                 if (args[1].equals("-claim"))
                     DailyRewardsManagerServer.instance().getPlayerDataManager().claimReward(CommandBase.getCommandSenderAsPlayer(sender));
         }
+    }
+
+    @Override
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
+        if (args.length == 2)
+            return CommandBase.getListOfStringsMatchingLastWord(args, "-claim");
+        return Collections.<String>emptyList();
     }
 }

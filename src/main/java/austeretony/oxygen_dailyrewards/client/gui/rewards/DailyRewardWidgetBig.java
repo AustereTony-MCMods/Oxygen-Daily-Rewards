@@ -119,7 +119,7 @@ public class DailyRewardWidgetBig extends GUISimpleElement<DailyRewardWidgetBig>
     @Override
     public void drawTooltip(int mouseX, int mouseY) {
         if (this.reward.getItemStack() != null && mouseX >= this.getX() + 32 && mouseY >= this.getY() + 32 && mouseX < this.getX() + 64 && mouseY < this.getY() + 64)
-            this.screen.drawToolTip(this.reward.getItemStack(), mouseX + 4, mouseY);
+            this.screen.drawToolTip(this.reward.getItemStack(), mouseX, mouseY);
         else if (this.hasTooltip() && mouseX >= this.getX() + 40 && mouseY >= this.getY() + 40 && mouseX < this.getX() + 56 && mouseY < this.getY() + 56) {
             float 
             width = this.textWidth(this.getTooltipText(), this.getTooltipScaleFactor()) + 6.0F,

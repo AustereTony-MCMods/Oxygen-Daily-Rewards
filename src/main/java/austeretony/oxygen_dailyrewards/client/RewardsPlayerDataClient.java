@@ -39,8 +39,10 @@ public class RewardsPlayerDataClient {
         lastTimePlayerRewarded = TimeHelperClient.getServerZonedDateTime(this.lastRewardTimeMillis),
         nextRewardTime = lastTimePlayerRewarded.plusDays(1L).withHour(DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt()).withMinute(0).withSecond(0);
 
+        boolean resetRewards = DailyRewardsConfig.REWARD_MODE.asInt() == 0 ? lastTimePlayerRewarded.getMonthValue() != currentServerTime.getMonthValue() : this.daysRewarded >= DailyRewardsManagerClient.instance().getRewardsDataContainer().getRewards().size();
+
         if (this.lastRewardTimeMillis != 0L 
-                && lastTimePlayerRewarded.getMonthValue() != currentServerTime.getMonthValue()
+                && resetRewards
                 && currentServerTime.getHour() >= DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt())
             this.daysRewarded = 0;
 

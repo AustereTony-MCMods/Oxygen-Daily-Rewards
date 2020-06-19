@@ -26,6 +26,7 @@ import austeretony.oxygen_core.common.main.OxygenMain;
 import austeretony.oxygen_core.common.util.JsonUtils;
 import austeretony.oxygen_core.server.api.OxygenHelperServer;
 import austeretony.oxygen_core.server.api.TimeHelperServer;
+import austeretony.oxygen_dailyrewards.common.config.DailyRewardsConfig;
 import austeretony.oxygen_dailyrewards.common.network.client.CPSyncRewardsData;
 import austeretony.oxygen_dailyrewards.common.reward.EnumReward;
 import austeretony.oxygen_dailyrewards.common.reward.Reward;
@@ -63,15 +64,19 @@ public class RewardsDataContainerServer {
     }
 
     public void loadRewardsData() {
-        Month currentMonth = TimeHelperServer.getZonedDateTime().getMonth();
+        String folder = null;
+        if (DailyRewardsConfig.REWARD_MODE.asInt() == 0) {
+            Month currentMonth = TimeHelperServer.getZonedDateTime().getMonth();
 
-        String 
-        monthName = currentMonth.getDisplayName(TextStyle.FULL, Locale.ENGLISH),
-        folder = OxygenHelperCommon.getConfigFolder() + "data/server/daily rewards/rewards_" + monthName.toLowerCase() + ".json";
+            String monthName = currentMonth.getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+            folder = OxygenHelperCommon.getConfigFolder() + "data/server/daily rewards/rewards_" + monthName.toLowerCase() + ".json";
+        } else {
+            folder = OxygenHelperCommon.getConfigFolder() + "data/server/daily rewards/rewards.json";
+        }
 
         Path path = Paths.get(folder);
         if (!Files.exists(path))
-            createDefaultRewardsDataFiles();
+            createDefaultRewardFiles();
 
         JsonArray rewardsArray;
         JsonObject rewardObject;
@@ -84,16 +89,16 @@ public class RewardsDataContainerServer {
                 enumReward = EnumReward.valueOf(rewardObject.get("type").getAsString());
                 this.rewards.add(enumReward.fromJson(rewardObject));
             }
-            OxygenMain.LOGGER.info("[Daily Rewards] Successfuly loaded rewards for <{}>.", monthName);
+            OxygenMain.LOGGER.info("[Daily Rewards] Successfuly loaded rewards from file <{}>.", folder);
         } catch (IOException exception) {
-            OxygenMain.LOGGER.error("[Daily Rewards] Rewards data file for <" + monthName + "> is damaged!", exception);
+            OxygenMain.LOGGER.error("[Daily Rewards] Rewards data file <" + folder + "> is damaged!", exception);
             exception.printStackTrace();
         }
 
         this.compressRewardsData();
     }
 
-    private static void createDefaultRewardsDataFiles() {
+    private static void createDefaultRewardFiles() {
         String folder;
         Path path;
         JsonArray rewardsArray;
@@ -102,31 +107,44 @@ public class RewardsDataContainerServer {
         defaultReward = ItemStackWrapper.of(new ItemStack(Items.EMERALD)).toJson().getAsJsonObject();
         int i;
 
-        for (Month month : Month.values()) {
-            folder = OxygenHelperCommon.getConfigFolder() + "data/server/daily rewards/rewards_" + month.getDisplayName(TextStyle.FULL, Locale.ENGLISH).toLowerCase() + ".json";
-            path = Paths.get(folder);    
-            try {  
-                if (!Files.exists(path))
-                    Files.createDirectories(path.getParent());    
-
-                rewardsArray = new JsonArray();    
-                for (i = 0; i < month.maxLength(); i++) {
-                    rewardObject = new JsonObject();
-                    rewardObject.add("day", new JsonPrimitive(i + 1));
-                    rewardObject.add("type", new JsonPrimitive(EnumReward.ITEM.toString()));
-                    rewardObject.add("description", new JsonPrimitive("oxygen_dailyrewards.description.item"));
-                    rewardObject.add("amount", new JsonPrimitive(1));
-                    rewardObject.add("special", new JsonPrimitive(false));
-                    rewardObject.add("itemstack", defaultReward);
-                    rewardsArray.add(rewardObject);
-                }
-                JsonUtils.createExternalJsonFile(folder, rewardsArray);
-            } catch (IOException exception) {
-                OxygenMain.LOGGER.error("[Daily Rewards] Failed to create default reward data file! Path: {}", folder);
-                exception.printStackTrace();
-            }   
+        if (DailyRewardsConfig.REWARD_MODE.asInt() == 0) {
+            for (Month month : Month.values()) {
+                folder = OxygenHelperCommon.getConfigFolder() + "data/server/daily rewards/rewards_" + month.getDisplayName(TextStyle.FULL, Locale.ENGLISH).toLowerCase() + ".json";
+                createDefaultRewardsFile(folder, month.maxLength());
+            } 
+        } else {
+            folder = OxygenHelperCommon.getConfigFolder() + "data/server/daily rewards/rewards.json";
+            createDefaultRewardsFile(folder, 7);
         }
-        OxygenMain.LOGGER.info("[Daily Rewards] Successfuly created default daily rewards data files.");
+        OxygenMain.LOGGER.info("[Daily Rewards] Successfuly created default daily rewards data file(s).");
+    }
+
+    private static void createDefaultRewardsFile(String folder, int days) {
+        Path path = Paths.get(folder);    
+        try {  
+            if (!Files.exists(path))
+                Files.createDirectories(path.getParent());    
+
+            JsonArray rewardsArray = new JsonArray();    
+            JsonObject 
+            rewardObject, 
+            defaultReward = ItemStackWrapper.of(new ItemStack(Items.EMERALD)).toJson().getAsJsonObject();
+
+            for (int i = 0; i < days; i++) {
+                rewardObject = new JsonObject();
+                rewardObject.add("day", new JsonPrimitive(i + 1));
+                rewardObject.add("type", new JsonPrimitive(EnumReward.ITEM.toString()));
+                rewardObject.add("description", new JsonPrimitive("oxygen_dailyrewards.description.item"));
+                rewardObject.add("amount", new JsonPrimitive(1));
+                rewardObject.add("special", new JsonPrimitive(false));
+                rewardObject.add("itemstack", defaultReward);
+                rewardsArray.add(rewardObject);
+            }
+            JsonUtils.createExternalJsonFile(folder, rewardsArray);
+        } catch (IOException exception) {
+            OxygenMain.LOGGER.error("[Daily Rewards] Failed to create default reward data file! Path: {}", folder);
+            exception.printStackTrace();
+        } 
     }
 
     private void compressRewardsData() {

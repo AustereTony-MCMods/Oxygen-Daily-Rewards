@@ -156,7 +156,9 @@ public class RewardScript implements Reward {
 
             Object result = shell.evaluate(this.scriptWrapper.getScriptText(), this.scriptWrapper.getName(), DailyRewardsConfig.DEBUG_SCRIPTS.asBoolean());
 
-            if (result != null && (Boolean) result) {
+            if (result != null 
+			&& result instanceof Boolean
+			&& (Boolean) result) {
                 if (DailyRewardsConfig.ADVANCED_LOGGING.asBoolean())
                     OxygenMain.LOGGER.info("[Daily Rewards] <{}/{}> [2]: player rewarded with SCRIPT - {}.", 
                             CommonReference.getName(playerMP), 

@@ -150,7 +150,7 @@ public class RewardCommand implements Reward {
             result = CommonReference.getServer().commandManager.executeCommand(CommonReference.getServer(), command);
 
             if (result == 0)
-                OxygenMain.LOGGER.info("[Daily Rewards] <{}/{}> Failed to execute command: {}.", 
+                OxygenMain.LOGGER.info("[Daily Rewards] <{}/{}> Failed to execute command: {}", 
                         CommonReference.getName(playerMP), 
                         CommonReference.getPersistentUUID(playerMP),
                         command);
