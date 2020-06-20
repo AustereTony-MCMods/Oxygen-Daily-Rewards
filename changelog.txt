@@ -1,3 +1,12 @@
+0.11.2b [2020-06-19]
++ Added command to open daily rewards menu with server-side command: "/oxygenop dailyreawrds -open-menu {target}"
+
+0.11.1b [2020-06-07]
++ Added localizations: Chinese, Polish and French
+
+0.11.0b [2020-03-20]
++ GUI optimization
+
 0.10.4b [2020-02-12]
 + Added support for rewards in the form of console commands
 + Fixed potential errors when calculating rewards at the beginning of a new month
