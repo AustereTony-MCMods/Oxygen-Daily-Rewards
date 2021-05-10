@@ -1,0 +1,23 @@
+key.oxygen_daily_rewards.open_daily_rewards_screen=Open Daily Rewards Screen
+
+oxygen.gui.setting.daily_rewards_screen_alignment=Daily rewards screen alignment
+oxygen.gui.setting.add_daily_rewards_screen=Add daily rewards screen
+
+oxygen_daily_rewards.gui.daily_rewards.title=Daily Rewards
+oxygen_daily_rewards.gui.daily_rewards.title_month=Daily Rewards: %s
+
+oxygen_daily_rewards.gui.daily_rewards.button.claim_reward=Claim reward
+oxygen_daily_rewards.gui.daily_rewards.label.next_month_begins=: a new month will begin
+
+oxygen_daily_rewards.gui.daily_reward.widget.day=Day %s
+oxygen_daily_rewards.gui.daily_reward.widget.available_reward=Available
+oxygen_daily_rewards.gui.daily_reward.widget.next_reward=Next reward
+
+oxygen_daily_rewards.status_message.daily_reward_available=Daily reward available!
+oxygen_daily_rewards.status_message.click_here=Click here
+oxygen_daily_rewards.status_message.daily_reward_claimed=Daily reward claimed
+oxygen_daily_rewards.status_message.daily_reward_unavailable=Daily reward not yet available
+
+oxygen_daily_rewards.reward_type.item_stack=Item
+oxygen_daily_rewards.reward_type.currency=Currency
+oxygen_daily_rewards.reward_type.command=Special

@@ -1,0 +1,23 @@
+key.oxygen_daily_rewards.open_daily_rewards_screen=Открыть Меню Ежедневных Наград
+
+oxygen.gui.setting.daily_rewards_screen_alignment=Выравнивание меню ежедневных наград
+oxygen.gui.setting.add_daily_rewards_screen=Добавить меню ежедневных наград
+
+oxygen_daily_rewards.gui.daily_rewards.title=Ежедневные Награды
+oxygen_daily_rewards.gui.daily_rewards.title_month=Ежедневные Награды: %s
+
+oxygen_daily_rewards.gui.daily_rewards.button.claim_reward=Получить награду
+oxygen_daily_rewards.gui.daily_rewards.label.next_month_begins=: начнётся новый месяц
+
+oxygen_daily_rewards.gui.daily_reward.widget.day=День %s
+oxygen_daily_rewards.gui.daily_reward.widget.available_reward=Доступно
+oxygen_daily_rewards.gui.daily_reward.widget.next_reward=След. награда
+
+oxygen_daily_rewards.status_message.daily_reward_available=Доступна ежедневная награда!
+oxygen_daily_rewards.status_message.click_here=Нажмите здесь
+oxygen_daily_rewards.status_message.daily_reward_claimed=Ежедневная награда получена
+oxygen_daily_rewards.status_message.daily_reward_unavailable=Ежедневная награда ещё не доступна
+
+oxygen_daily_rewards.reward_type.item_stack=Предмет
+oxygen_daily_rewards.reward_type.currency=Валюта
+oxygen_daily_rewards.reward_type.command=Трофей
