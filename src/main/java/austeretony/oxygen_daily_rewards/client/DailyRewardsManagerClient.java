@@ -3,6 +3,7 @@ package austeretony.oxygen_daily_rewards.client;
 import austeretony.oxygen_core.client.api.OxygenClient;
 import austeretony.oxygen_core.client.api.PrivilegesClient;
 import austeretony.oxygen_core.common.main.OxygenMain;
+import austeretony.oxygen_daily_rewards.common.config.DailyRewardsConfig;
 import austeretony.oxygen_daily_rewards.common.main.DailyRewardsPrivileges;
 import austeretony.oxygen_daily_rewards.common.network.server.SPClaimReward;
 import austeretony.oxygen_daily_rewards.common.player.PlayerData;
@@ -10,11 +11,10 @@ import austeretony.oxygen_daily_rewards.common.reward.DailyReward;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
-import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 public final class DailyRewardsManagerClient {
 
@@ -73,9 +73,10 @@ public final class DailyRewardsManagerClient {
             return false;
         }
 
-        Instant nextRewardTime = Instant.ofEpochMilli(clientPlayerData.getLastTimeRewardedMillis())
-                .plusMillis(TimeUnit.HOURS.toMillis(24L));
-        return OxygenClient.getInstant().isAfter(nextRewardTime);
+        ZonedDateTime lastTimePlayerRewarded = OxygenClient.getZonedDateTime(clientPlayerData.getLastTimeRewardedMillis());
+        ZonedDateTime nextRewardTime = lastTimePlayerRewarded.plusDays(1L)
+                .withHour(DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt()).withMinute(0).withSecond(0);
+        return OxygenClient.getInstant().isAfter(nextRewardTime.toInstant());
     }
 
     public void claimReward() {

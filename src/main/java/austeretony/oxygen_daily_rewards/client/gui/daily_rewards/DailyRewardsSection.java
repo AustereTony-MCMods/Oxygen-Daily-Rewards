@@ -13,18 +13,17 @@ import austeretony.oxygen_core.client.gui.base.text.TextLabel;
 import austeretony.oxygen_core.client.gui.util.OxygenGUIUtils;
 import austeretony.oxygen_core.client.util.MinecraftClient;
 import austeretony.oxygen_daily_rewards.client.DailyRewardsManagerClient;
+import austeretony.oxygen_daily_rewards.common.config.DailyRewardsConfig;
 import austeretony.oxygen_daily_rewards.common.player.PlayerData;
 import austeretony.oxygen_daily_rewards.common.reward.DailyReward;
 import net.minecraft.client.gui.ScaledResolution;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 public class DailyRewardsSection extends Section {
 
@@ -34,7 +33,7 @@ public class DailyRewardsSection extends Section {
 
     private ScaledResolution sr;
     private ZonedDateTime serverTime;
-    private boolean gotDailyReward;
+    private boolean receivedReward;
 
     public DailyRewardsSection(@Nonnull DailyRewardsScreen screen) {
         super(screen);
@@ -70,7 +69,7 @@ public class DailyRewardsSection extends Section {
         List<DailyReward> rewardList = DailyRewardsManagerClient.instance().getRewardList();
         int monthLength = serverTime.getMonth().length(serverTime.toLocalDate().isLeapYear());
         int dayOfMonth = serverTime.getDayOfMonth();
-        gotDailyReward = !DailyRewardsManagerClient.instance().isRewardAvailable();
+        receivedReward = !DailyRewardsManagerClient.instance().isRewardAvailable();
 
         int y = -DailyRewardsScreen.REWARD_WIDGET_SIZE + 14;
         for (DailyReward reward : rewardList) {
@@ -83,8 +82,8 @@ public class DailyRewardsSection extends Section {
             widgetGroup.addWidget(new RewardWidget(x, y, reward,
                     reward.getDay() <= playerData.getDaysRewarded(),
                     reward.getDay() == playerData.getDaysRewarded() + 1,
-                    reward.getDay() > (gotDailyReward ? playerData.getDaysRewarded() : playerData.getDaysRewarded() + 1),
-                    reward.getDay() - playerData.getDaysRewarded() > monthLength - dayOfMonth + (gotDailyReward ? 0 : 1)));
+                    reward.getDay() > (receivedReward ? playerData.getDaysRewarded() : playerData.getDaysRewarded() + 1),
+                    reward.getDay() - playerData.getDaysRewarded() > monthLength - dayOfMonth + (receivedReward ? 0 : 1)));
         }
     }
 
@@ -97,11 +96,12 @@ public class DailyRewardsSection extends Section {
     @Override
     public void update() {
         super.update();
-        if (!gotDailyReward || MinecraftClient.getClientPlayer().ticksExisted % 20 != 0) return;
+        if (!receivedReward || MinecraftClient.getClientPlayer().ticksExisted % 20 != 0) return;
 
         PlayerData playerData = DailyRewardsManagerClient.instance().getClientPlayerData();
-        Instant nextRewardTime = Instant.ofEpochMilli(playerData.getLastTimeRewardedMillis())
-                .plusMillis(TimeUnit.HOURS.toMillis(24L));
+        ZonedDateTime lastTimePlayerRewarded = OxygenClient.getZonedDateTime(playerData.getLastTimeRewardedMillis());
+        ZonedDateTime nextRewardTime = lastTimePlayerRewarded.plusDays(1L)
+                .withHour(DailyRewardsConfig.REWARD_TIME_OFFSET_HOURS.asInt()).withMinute(0).withSecond(0);
         Duration duration =  Duration.between(OxygenClient.getInstant(), nextRewardTime);
 
         String timeLeftStr = String.format("%d:%02d:%02d", duration.getSeconds() / 3600, (duration.getSeconds() % 3600) / 60,
